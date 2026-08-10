@@ -11,13 +11,14 @@ export async function GET() {
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     teamId?: string;
+    matchId?: string;
   } | null;
-  const teamId = body?.teamId?.trim();
-  if (!teamId) {
-    return NextResponse.json({ error: "teamId mancante" }, { status: 400 });
+  const matchId = (body?.matchId ?? body?.teamId)?.trim();
+  if (!matchId) {
+    return NextResponse.json({ error: "matchId mancante" }, { status: 400 });
   }
 
-  const result = await castPollVote(teamId);
+  const result = await castPollVote(matchId);
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }

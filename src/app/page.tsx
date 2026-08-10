@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { AdSlot } from "@/components/AdSlot";
+import { PollPanel } from "@/components/PollPanel";
 import { listLeagues } from "@/lib/football-api";
 import { getFootballNews } from "@/lib/news";
+import { buildPollState } from "@/lib/poll";
 
 export default async function HomePage() {
   const leagues = listLeagues();
   const news = await getFootballNews(6);
+  const poll = await buildPollState();
 
   return (
     <div className="space-y-8">
@@ -25,6 +28,26 @@ export default async function HomePage() {
 
       <AdSlot slot="top" />
 
+      <section className="space-y-3">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">
+              Mini-gioco di oggi
+            </p>
+            <h2 className="text-xl font-semibold text-[var(--accent)]">
+              Partita della giornata
+            </h2>
+          </div>
+          <Link
+            href="/sondaggio"
+            className="text-xs text-[var(--muted)] hover:text-[var(--accent)]"
+          >
+            Pagina completa
+          </Link>
+        </div>
+        <PollPanel initial={poll} compact />
+      </section>
+
       <section className="panel rounded-md p-4">
         <h2 className="text-lg font-semibold text-[var(--accent)]">
           Partite di oggi
@@ -33,12 +56,20 @@ export default async function HomePage() {
           Orari e risultati di tutte le partite in programma oggi, aggiornati in
           automatico.
         </p>
-        <Link
-          href="/oggi"
-          className="mt-3 inline-flex rounded bg-[var(--pitch)] px-3 py-1.5 text-sm hover:brightness-110"
-        >
-          Apri agenda di oggi
-        </Link>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link
+            href="/oggi"
+            className="inline-flex rounded bg-[var(--pitch)] px-3 py-1.5 text-sm hover:brightness-110"
+          >
+            Agenda di oggi
+          </Link>
+          <Link
+            href="/gol"
+            className="inline-flex rounded border border-[var(--line)] px-3 py-1.5 text-sm hover:border-[var(--accent)]"
+          >
+            Gol e marcatori
+          </Link>
+        </div>
       </section>
 
       <section className="space-y-3">

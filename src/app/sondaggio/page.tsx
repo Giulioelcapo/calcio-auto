@@ -9,8 +9,8 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: "Sondaggio miglior squadra di oggi",
-  description: `Vota la miglior squadra della giornata su ${SITE_NAME}. Sondaggio tra le squadre realmente in campo oggi.`,
+  title: "Sondaggio partita della giornata",
+  description: `Vota la partita della giornata su ${SITE_NAME}: 4 match del giorno, stile gioco community.`,
   alternates: { canonical: "/sondaggio" },
 };
 
@@ -21,10 +21,10 @@ export default async function SondaggioPage() {
     <div className="space-y-6">
       <section className="space-y-2">
         <p className="text-xs uppercase tracking-[0.25em] text-[var(--muted)]">
-          Community
+          Mini-gioco
         </p>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          Sondaggio
+          Partita della giornata
         </h1>
         <p className="max-w-2xl text-sm text-[var(--muted)]">{poll.title}</p>
       </section>
@@ -33,13 +33,13 @@ export default async function SondaggioPage() {
       <PollPanel initial={poll} />
 
       <p className="text-xs text-[var(--muted)]">
-        Vedi anche{" "}
-        <Link href="/gol" className="text-[var(--accent)] hover:underline">
-          Gol e risultati ufficiali
+        Torna alla{" "}
+        <Link href="/" className="text-[var(--accent)] hover:underline">
+          dashboard
         </Link>{" "}
-        e{" "}
-        <Link href="/oggi" className="text-[var(--accent)] hover:underline">
-          Partite di oggi
+        per giocare subito, oppure apri{" "}
+        <Link href="/gol" className="text-[var(--accent)] hover:underline">
+          Gol e marcatori
         </Link>
         .
       </p>

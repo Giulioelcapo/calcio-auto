@@ -708,3 +708,34 @@ export async function getTodaysMatches(): Promise<TodaysMatchesResult> {
     usingMock: false,
   };
 }
+
+export type LeagueScorersBlock = {
+  leagueName: string;
+  leagueSlug: string;
+  scorers: ScorerRow[];
+};
+
+/** Marcatori ufficiali multi-lega (solo se l’API li fornisce). */
+export async function getMultiLeagueScorers(
+  slugs: string[] = [
+    "serie-a",
+    "premier-league",
+    "la-liga",
+    "bundesliga",
+    "ligue-1",
+    "championship",
+  ],
+  perLeague = 5,
+): Promise<LeagueScorersBlock[]> {
+  const blocks: LeagueScorersBlock[] = [];
+  for (const slug of slugs) {
+    const bundle = await getCompetitionBundle(slug);
+    if (!bundle?.scorersAvailable || !bundle.scorers.length) continue;
+    blocks.push({
+      leagueName: bundle.league.name,
+      leagueSlug: bundle.league.slug,
+      scorers: bundle.scorers.slice(0, perLeague),
+    });
+  }
+  return blocks;
+}

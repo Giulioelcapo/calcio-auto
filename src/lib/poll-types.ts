@@ -1,8 +1,14 @@
 export type PollCandidate = {
   id: string;
-  name: string;
-  crest: string | null;
+  homeTeam: string;
+  awayTeam: string;
+  homeCrest: string | null;
+  awayCrest: string | null;
   leagueName: string;
+  kickoff: string;
+  status: string;
+  homeScore: number | null;
+  awayScore: number | null;
   votes: number;
 };
 

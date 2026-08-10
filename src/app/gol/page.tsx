@@ -3,7 +3,7 @@ import Link from "next/link";
 import { AdSlot } from "@/components/AdSlot";
 import { Crest } from "@/components/Crest";
 import {
-  getCompetitionBundle,
+  getMultiLeagueScorers,
   getTodaysMatches,
 } from "@/lib/football-api";
 import { SITE_NAME } from "@/lib/site";
@@ -12,8 +12,8 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: "Gol e risultati ufficiali di oggi",
-  description: `Gol e risultati precisi di oggi su ${SITE_NAME}: solo dati ufficiali API, nessun marcature inventato.`,
+  title: "Gol e marcatori ufficiali",
+  description: `Gol e marcatori precisi su ${SITE_NAME}: risultati di oggi e top scorer multi-lega solo da API ufficiale.`,
   alternates: { canonical: "/gol" },
 };
 
@@ -29,11 +29,7 @@ export default async function GolPage() {
     (m) =>
       m.status === "IN_PLAY" || m.status === "PAUSED" || m.status === "LIVE",
   );
-
-  // Marcatori solo da endpoint ufficiale (Serie A). Se non disponibile, non inventiamo.
-  const serieA = await getCompetitionBundle("serie-a");
-  const scorers =
-    serieA && serieA.scorersAvailable ? serieA.scorers.slice(0, 10) : [];
+  const scorerBlocks = await getMultiLeagueScorers();
 
   return (
     <div className="space-y-6">
@@ -42,11 +38,11 @@ export default async function GolPage() {
           Dati ufficiali
         </p>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          Gol e risultati
+          Gol e marcatori
         </h1>
         <p className="max-w-2xl text-sm text-[var(--muted)]">
-          {today.dateLabel}. Mostriamo solo risultati e marcatori provenienti
-          dall’API football-data.org. Niente gol “a caso” o goleador inventati.
+          {today.dateLabel}. Risultati ufficiali di oggi + marcatori di più
+          campionati (solo se l’API free li espone). Nessun goleador inventato.
         </p>
       </section>
 
@@ -77,20 +73,14 @@ export default async function GolPage() {
                     <span>{match.awayTeam}</span>
                   </div>
                 </div>
-                <div className="mt-1 text-center text-[11px] text-[var(--muted)]">
-                  Gol totali in partita:{" "}
-                  {(match.homeScore ?? 0) + (match.awayScore ?? 0)} (risultato
-                  ufficiale)
-                </div>
               </li>
             ))}
           </ul>
         ) : (
           <p className="panel rounded-md p-4 text-sm text-[var(--muted)]">
-            Nessun risultato ufficiale concluso oggi. In pre-stagione o a inizio
-            giornata è normale.{" "}
+            Nessun risultato ufficiale concluso oggi.{" "}
             <Link href="/oggi" className="text-[var(--accent)] hover:underline">
-              Vedi il calendario di oggi
+              Calendario di oggi
             </Link>
             .
           </p>
@@ -114,49 +104,66 @@ export default async function GolPage() {
         </section>
       ) : null}
 
-      <section className="space-y-3">
+      <section className="space-y-4">
         <h2 className="text-lg font-semibold text-[var(--accent)]">
-          Marcatori Serie A (ufficiali)
+          Marcatori multi-lega (ufficiali)
         </h2>
-        {scorers.length ? (
-          <ol className="fm-panel divide-y divide-[var(--line)]">
-            {scorers.map((row) => (
-              <li
-                key={`${row.rank}-${row.playerName}`}
-                className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="data-font w-6 text-[var(--accent)]">
-                    {row.rank}
-                  </span>
-                  <div>
-                    <div className="font-medium">{row.playerName}</div>
-                    <div className="text-xs text-[var(--muted)]">
-                      {row.teamName}
-                    </div>
-                  </div>
+        {scorerBlocks.length ? (
+          <div className="grid gap-4 lg:grid-cols-2">
+            {scorerBlocks.map((block) => (
+              <div key={block.leagueSlug} className="fm-panel">
+                <div className="flex items-center justify-between border-b border-[var(--line)] px-4 py-2">
+                  <h3 className="text-sm font-semibold">{block.leagueName}</h3>
+                  <Link
+                    href={`/${block.leagueSlug}/marcatori`}
+                    className="text-[10px] uppercase tracking-wide text-[var(--muted)] hover:text-[var(--accent)]"
+                  >
+                    Vedi tutti
+                  </Link>
                 </div>
-                <span className="data-font font-semibold text-[var(--accent)]">
-                  {row.goals} gol
-                </span>
-              </li>
+                <ol className="divide-y divide-[var(--line)]">
+                  {block.scorers.map((row) => (
+                    <li
+                      key={`${block.leagueSlug}-${row.rank}-${row.playerName}`}
+                      className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="data-font w-5 text-[var(--accent)]">
+                          {row.rank}
+                        </span>
+                        <div>
+                          <div className="font-medium">{row.playerName}</div>
+                          <div className="text-xs text-[var(--muted)]">
+                            {row.teamName}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="data-font font-semibold text-[var(--accent)]">
+                        {row.goals}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
             ))}
-          </ol>
+          </div>
         ) : (
           <p className="panel rounded-md p-4 text-sm text-[var(--muted)]">
-            Elenco marcatori non disponibile dall’API free in questo momento
-            (stagione non iniziata o endpoint non incluso). Non mostriamo nomi
-            inventati.
+            Nessun elenco marcatori disponibile ora dall’API free (tipico in
+            pre-stagione). Non inventiamo gol o nomi.
           </p>
         )}
       </section>
 
       <p className="text-sm text-[var(--muted)]">
-        Partecipa al{" "}
-        <Link href="/sondaggio" className="text-[var(--accent)] hover:underline">
-          sondaggio miglior squadra di oggi
-        </Link>
-        .
+        Gioca al{" "}
+        <Link
+          href="/sondaggio"
+          className="text-[var(--accent)] hover:underline"
+        >
+          sondaggio partita della giornata
+        </Link>{" "}
+        anche dalla home.
       </p>
     </div>
   );
