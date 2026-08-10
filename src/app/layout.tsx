@@ -6,6 +6,7 @@ import { Footer, Header } from "@/components/Header";
 import {
   SITE_NAME,
   SITE_TAGLINE,
+  adsenseClient,
   googleSiteVerification,
   siteUrl,
 } from "@/lib/site";
@@ -39,6 +40,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "it_IT",
     url: siteUrl(),
+  },
+  other: {
+    "google-adsense-account": adsenseClient() ?? "ca-pub-6747403673692656",
   },
   ...(verification
     ? { verification: { google: verification } }

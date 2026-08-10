@@ -18,7 +18,9 @@ export function siteUrl(): string {
 
 export function adsenseClient(): string | undefined {
   const id = process.env["NEXT_PUBLIC_ADSENSE_CLIENT_ID"]?.trim();
-  return id || undefined;
+  if (id) return id;
+  // Publisher pubblico (visibile nello snippet AdSense)
+  return "ca-pub-6747403673692656";
 }
 
 export function adsenseSlot(kind: "top" | "side" | "in-content"): string | undefined {
