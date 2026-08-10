@@ -42,29 +42,13 @@ export function AdSlot({ slot = "top", className = "" }: AdSlotProps) {
     }
   }, [client, adSlotId, allowed]);
 
+  // Niente placeholder pubblici finché non ci sono slot reali
   if (!client || !adSlotId) {
-    return (
-      <aside
-        className={`panel flex ${minH} items-center justify-center rounded-md px-3 py-4 text-center text-xs text-[var(--muted)] ${className}`}
-        aria-label={`Spazio pubblicitario ${slot}`}
-      >
-        <span>
-          Banner AdSense ({slot}) — dopo l’approvazione configura client ID e
-          slot in `.env` / Vercel.
-        </span>
-      </aside>
-    );
+    return null;
   }
 
   if (!allowed) {
-    return (
-      <aside
-        className={`panel flex ${minH} items-center justify-center rounded-md px-3 py-4 text-center text-xs text-[var(--muted)] ${className}`}
-        aria-label="Annuncio in attesa di consenso cookie"
-      >
-        Accetta i cookie per mostrare gli annunci.
-      </aside>
-    );
+    return null;
   }
 
   return (
