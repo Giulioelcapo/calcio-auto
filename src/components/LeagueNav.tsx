@@ -28,9 +28,10 @@ export function MockBanner({ usingMock }: { usingMock: boolean }) {
   if (!usingMock) return null;
   return (
     <p className="rounded border border-[var(--warn)]/40 bg-[var(--warn)]/10 px-3 py-2 text-sm text-[var(--warn)]">
-      Modalità demo (manca <code>FOOTBALL_DATA_API_TOKEN</code>): calendario
-      pre-stagione 2026/2027 senza risultati inventati. Aggiungi il token in{" "}
-      <code>.env.local</code> per i dati ufficiali.
+      Modalità demo: token mancante oppure API football-data.org non disponibile
+      (account disabilitato, 403, rate limit). Controlla{" "}
+      <code>FOOTBALL_DATA_API_TOKEN</code> in <code>.env.local</code> e su
+      Vercel, poi riavvia / Redeploy.
     </p>
   );
 }

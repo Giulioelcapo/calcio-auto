@@ -7,7 +7,7 @@ export function DataBadge({ usingMock }: { usingMock: boolean }) {
           : "bg-[color-mix(in_srgb,var(--accent-2)_20%,transparent)] text-[var(--accent-2)]"
       }`}
     >
-      {usingMock ? "Dati demo (manca API token)" : "Live API free"}
+      {usingMock ? "Dati demo (API non disponibile)" : "Live API free"}
     </span>
   );
 }
