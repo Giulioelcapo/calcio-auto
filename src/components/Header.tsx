@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CalcioAutoLogo } from "@/components/CalcioAutoLogo";
 import { NewsTicker } from "@/components/NewsTicker";
 import { LEAGUES } from "@/lib/leagues";
 import { getFootballNews } from "@/lib/news";
@@ -11,12 +12,15 @@ export async function Header() {
     <header className="border-b border-[var(--line)] bg-black/30 backdrop-blur">
       <NewsTicker items={news} />
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-        <Link href="/" className="flex items-baseline gap-2">
-          <span className="text-lg font-bold tracking-tight text-[var(--accent)]">
-            {SITE_NAME}
-          </span>
-          <span className="hidden text-xs uppercase tracking-[0.2em] text-[var(--muted)] sm:inline">
-            FM Data Hub
+        <Link href="/" className="flex items-center gap-2.5">
+          <CalcioAutoLogo className="h-9 w-9 shrink-0" />
+          <span className="flex flex-col leading-none">
+            <span className="text-lg font-bold tracking-tight text-[var(--accent)]">
+              {SITE_NAME}
+            </span>
+            <span className="mt-1 hidden text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] sm:inline">
+              FM Data Hub
+            </span>
           </span>
         </Link>
         <nav className="flex max-w-[70%] items-center gap-2 overflow-x-auto text-xs text-[var(--muted)] sm:max-w-none sm:text-sm">
@@ -51,12 +55,15 @@ export function Footer() {
   return (
     <footer className="mt-auto border-t border-[var(--line)] py-8 text-sm text-[var(--muted)]">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <p className="font-semibold text-[var(--accent)]">{SITE_NAME}</p>
-          <p className="text-xs">
-            Classifiche e calendari aggiornati in automatico · Dati
-            football-data.org
-          </p>
+        <div className="flex items-start gap-3">
+          <CalcioAutoLogo className="h-10 w-10 shrink-0" />
+          <div className="space-y-1">
+            <p className="font-semibold text-[var(--accent)]">{SITE_NAME}</p>
+            <p className="text-xs">
+              Classifiche e calendari aggiornati in automatico · Dati
+              football-data.org
+            </p>
+          </div>
         </div>
         <nav className="flex flex-wrap gap-x-4 gap-y-2 text-xs">
           <Link href="/oggi" className="hover:text-[var(--ink)]">
