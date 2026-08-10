@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { AdSlot } from "@/components/AdSlot";
 import { listLeagues } from "@/lib/football-api";
+import { getFootballNews } from "@/lib/news";
 
-export default function HomePage() {
+export default async function HomePage() {
   const leagues = listLeagues();
+  const news = await getFootballNews(6);
 
   return (
     <div className="space-y-8">
@@ -15,9 +17,9 @@ export default function HomePage() {
           <span className="text-[var(--accent)]">CalcioAuto</span>
         </h1>
         <p className="max-w-2xl text-base text-[var(--muted)]">
-          Classifiche, calendari, risultati, squadre e insight automatici sui 12
-          campionati del piano gratuito football-data.org. Stile Football Manager,
-          mobile-first, pronto per AdSense.
+          Classifiche, calendari, risultati, notizie e insight automatici sui 12
+          campionati free. Stile Football Manager, mobile-first, pronto per
+          AdSense.
         </p>
       </section>
 
@@ -37,6 +39,41 @@ export default function HomePage() {
         >
           Apri agenda di oggi
         </Link>
+      </section>
+
+      <section className="space-y-3">
+        <div className="flex items-end justify-between gap-3">
+          <h2 className="text-xl font-semibold text-[var(--accent)]">
+            Notizie e mercato
+          </h2>
+          <Link
+            href="/notizie"
+            className="text-xs text-[var(--muted)] hover:text-[var(--accent)]"
+          >
+            Vedi tutte
+          </Link>
+        </div>
+        {news.length ? (
+          <ul className="fm-panel divide-y divide-[var(--line)]">
+            {news.map((item) => (
+              <li key={item.id}>
+                <a
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block px-4 py-3 hover:bg-white/5"
+                >
+                  <div className="text-[10px] uppercase tracking-wide text-[var(--muted)]">
+                    {item.source}
+                  </div>
+                  <div className="mt-1 text-sm font-medium">{item.title}</div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-[var(--muted)]">Notizie in aggiornamento…</p>
+        )}
       </section>
 
       <section className="space-y-4">

@@ -1,10 +1,15 @@
 import Link from "next/link";
+import { NewsTicker } from "@/components/NewsTicker";
 import { LEAGUES } from "@/lib/leagues";
+import { getFootballNews } from "@/lib/news";
 import { SITE_NAME } from "@/lib/site";
 
-export function Header() {
+export async function Header() {
+  const news = await getFootballNews(12);
+
   return (
     <header className="border-b border-[var(--line)] bg-black/30 backdrop-blur">
+      <NewsTicker items={news} />
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <Link href="/" className="flex items-baseline gap-2">
           <span className="text-lg font-bold tracking-tight text-[var(--accent)]">
@@ -21,7 +26,13 @@ export function Header() {
           >
             Oggi
           </Link>
-          {LEAGUES.slice(0, 6).map((league) => (
+          <Link
+            href="/notizie"
+            className="whitespace-nowrap rounded px-2 py-1 font-medium text-[var(--accent)] hover:bg-white/5"
+          >
+            News
+          </Link>
+          {LEAGUES.slice(0, 5).map((league) => (
             <Link
               key={league.slug}
               href={`/${league.slug}`}
@@ -50,6 +61,9 @@ export function Footer() {
         <nav className="flex flex-wrap gap-x-4 gap-y-2 text-xs">
           <Link href="/oggi" className="hover:text-[var(--ink)]">
             Partite di oggi
+          </Link>
+          <Link href="/notizie" className="hover:text-[var(--ink)]">
+            Notizie
           </Link>
           <Link href="/chi-siamo" className="hover:text-[var(--ink)]">
             Chi siamo

@@ -15,6 +15,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "hourly",
       priority: 0.95,
     },
+    {
+      url: `${base}/notizie`,
+      lastModified: now,
+      changeFrequency: "hourly",
+      priority: 0.9,
+    },
   ];
 
   for (const path of LEGAL) {
