@@ -65,10 +65,6 @@ function dayRedisKey(dateISO: string) {
   return `calcioauto:poll:${dateISO}`;
 }
 
-function voteField(matchId: string, side: PollSide) {
-  return `${matchId}:${side}`;
-}
-
 async function redisCommand(command: (string | number)[]): Promise<unknown> {
   const url = redisUrl();
   const token = redisToken();
@@ -133,33 +129,14 @@ function normalizeDay(day: DayVotes | undefined): DayVotes {
 }
 
 async function getDayVotesFromRedis(dateISO: string): Promise<DayVotes> {
-  const raw = await redisCommand(["HGETALL", dayRedisKey(dateISO)]);
-  const votes: DayVotes = {};
-
-  if (Array.isArray(raw)) {
-    for (let i = 0; i + 1 < raw.length; i += 2) {
-      const field = String(raw[i]);
-      const count = Number(raw[i + 1]) || 0;
-      const [matchId, side] = field.split(":");
-      if (!matchId || (side !== "home" && side !== "away")) continue;
-      const current = votes[matchId] ?? { home: 0, away: 0 };
-      current[side] = count;
-      votes[matchId] = current;
-    }
-    return votes;
+  // GET/SET JSON: funziona anche se il piano/token non permette comandi HASH.
+  const raw = await redisCommand(["GET", dayRedisKey(dateISO)]);
+  if (typeof raw !== "string" || !raw) return {};
+  try {
+    return normalizeDay(JSON.parse(raw) as DayVotes);
+  } catch {
+    return {};
   }
-
-  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-    for (const [field, value] of Object.entries(raw as Record<string, unknown>)) {
-      const [matchId, side] = field.split(":");
-      if (!matchId || (side !== "home" && side !== "away")) continue;
-      const current = votes[matchId] ?? { home: 0, away: 0 };
-      current[side] = Number(value) || 0;
-      votes[matchId] = current;
-    }
-  }
-
-  return votes;
 }
 
 async function getDayVotesFromFile(dateISO: string): Promise<DayVotes> {
@@ -185,14 +162,27 @@ async function addSideVote(
   side: PollSide,
 ): Promise<void> {
   if (redisConfigured()) {
-    // Atomico: due voti dallo stesso secondo (Italia + Germania) non si perdono.
-    await redisCommand([
-      "HINCRBY",
-      dayRedisKey(dateISO),
-      voteField(matchId, side),
-      1,
-    ]);
-    await redisCommand(["EXPIRE", dayRedisKey(dateISO), 60 * 60 * 24 * 16]);
+    const key = dayRedisKey(dateISO);
+    const day: DayVotes = { ...(await getDayVotesFromRedis(dateISO)) };
+    const current = { ...(day[matchId] ?? { home: 0, away: 0 }) };
+    current[side] += 1;
+    day[matchId] = current;
+    try {
+      await redisCommand(["SET", key, JSON.stringify(day)]);
+      try {
+        await redisCommand(["EXPIRE", key, 60 * 60 * 24 * 16]);
+      } catch {
+        // EXPIRE opzionale su alcuni token ristretti
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (/NOPERM|no permissions/i.test(message)) {
+        throw new Error(
+          "Token Redis in sola lettura. Su Upstash copia il REST Token (non Read-Only) e aggiornalo su Vercel.",
+        );
+      }
+      throw err;
+    }
     return;
   }
 
