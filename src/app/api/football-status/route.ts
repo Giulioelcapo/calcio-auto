@@ -2,15 +2,35 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+function footballApiToken(): string {
+  const raw = (process.env["FOOTBALL_DATA_API_TOKEN"] ?? "").trim();
+  const token = (raw.split(/\r?\n/)[0] ?? "").trim();
+  if (!token) return "";
+  if (/upstash|https?:\/\//i.test(token)) return "";
+  return token;
+}
+
 /** Diagnostica token/API senza esporre il secret. */
 export async function GET() {
-  const token = (process.env["FOOTBALL_DATA_API_TOKEN"] ?? "").trim();
-  if (!token) {
+  const raw = (process.env["FOOTBALL_DATA_API_TOKEN"] ?? "").trim();
+  const token = footballApiToken();
+
+  if (!raw) {
     return NextResponse.json({
       configured: false,
       status: null,
       ok: false,
       hint: "FOOTBALL_DATA_API_TOKEN assente su questo ambiente",
+    });
+  }
+
+  if (!token) {
+    return NextResponse.json({
+      configured: false,
+      status: null,
+      ok: false,
+      hint:
+        "FOOTBALL_DATA_API_TOKEN non valido: sembra contenere un URL/Upstash. Metti SOLO il token di football-data.org (una riga).",
     });
   }
 

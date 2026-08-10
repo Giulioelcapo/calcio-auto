@@ -132,8 +132,17 @@ interface ApiTeamDetailResponse extends ApiTeam {
   runningCompetitions?: Array<{ name: string; code: string }>;
 }
 
+/** Token football-data: solo la prima riga, mai URL/Upstash per errore di paste. */
+function footballApiToken(): string {
+  const raw = (process.env["FOOTBALL_DATA_API_TOKEN"] ?? "").trim();
+  const token = (raw.split(/\r?\n/)[0] ?? "").trim();
+  if (!token) return "";
+  if (/upstash|https?:\/\//i.test(token)) return "";
+  return token;
+}
+
 function hasApiToken(): boolean {
-  return Boolean((process.env["FOOTBALL_DATA_API_TOKEN"] ?? "").trim());
+  return Boolean(footballApiToken());
 }
 
 function seasonLabelFromApi(season?: {
@@ -231,8 +240,7 @@ function mapMatches(matches: ApiMatch[]): MatchItem[] {
 async function apiFetch<T>(
   path: string,
 ): Promise<{ ok: true; data: T } | { ok: false; status: number }> {
-  // Bracket access evita che Next.js “inlined” undefined a build-time
-  const token = (process.env["FOOTBALL_DATA_API_TOKEN"] ?? "").trim();
+  const token = footballApiToken();
   if (!token) return { ok: false, status: 401 };
 
   try {
@@ -713,76 +721,58 @@ export async function getTodaysMatches(): Promise<TodaysMatchesResult> {
   };
 }
 
-/** Fallback sondaggio se l'API calcio non risponde. */
-function mockPollMatchPool(
-  dateISO: string,
-  dateLabel: string,
-): TodaysMatchesResult & { mode: "upcoming" } {
-  const poolLeagues = LEAGUES.filter(
-    (l) => l.code !== "WC" && l.code !== "EC",
-  ).slice(0, 6);
-  const matches: TodayMatch[] = [];
-  let slot = 0;
-  for (const league of poolLeagues) {
-    const mock = buildMockMatches(league).slice(0, 2);
-    for (const m of mock) {
-      const kickoff = new Date(`${dateISO}T12:00:00.000Z`);
-      kickoff.setUTCHours(15 + slot, (slot % 2) * 30, 0, 0);
-      matches.push({
-        ...m,
-        // id stabile per giorno + lega, così i voti Redis restano allineati
-        id: Number(`${dateISO.replaceAll("-", "")}${m.id}`.slice(0, 12)),
-        utcDate: kickoff.toISOString(),
-        status: "TIMED",
-        homeScore: null,
-        awayScore: null,
-        leagueName: league.name,
-        leagueSlug: league.slug,
-        leagueCode: league.code,
-      });
-      slot += 1;
-    }
-  }
-  matches.sort((a, b) => +new Date(a.utcDate) - +new Date(b.utcDate));
-  return {
-    dateISO,
-    dateLabel,
-    matches,
-    usingMock: true,
-    mode: "upcoming",
-  };
-}
-
 /**
- * Pool per sondaggio: partite di oggi, oppure prossimi giorni se oggi è vuoto.
+ * Pool sondaggio: SOLO partite reali API.
+ * Priorità: oggi (Europa/Roma). Se oggi è vuoto → prossimi giorni reali.
+ * Mai match inventati/demo.
  */
 export async function getPollMatchPool(): Promise<
   TodaysMatchesResult & { mode: "today" | "upcoming" }
 > {
   const today = await getTodaysMatches();
-  if (today.matches.length >= 2) {
-    return { ...today, mode: "today" };
+  if (today.matches.length >= 1) {
+    const open = today.matches.filter(
+      (m) => m.status !== "FINISHED" && m.status !== "AWARDED",
+    );
+    return {
+      ...today,
+      matches: open.length ? open : today.matches,
+      mode: "today",
+    };
   }
 
-  if (!hasApiToken()) {
-    return mockPollMatchPool(today.dateISO, today.dateLabel);
-  }
+  const empty = {
+    dateISO: today.dateISO,
+    dateLabel: today.dateLabel,
+    matches: [] as TodayMatch[],
+    usingMock: false as const,
+    mode: "today" as const,
+  };
+
+  if (!hasApiToken()) return empty;
 
   const dateISO = today.dateISO;
-  const dateTo = shiftIsoDate(dateISO, 10);
+  const dateTo = shiftIsoDate(dateISO, 14);
   const competitions = LEAGUES.map((l) => l.code).join(",");
   const res = await apiFetch<ApiMatchesResponse>(
     `/matches?dateFrom=${dateISO}&dateTo=${dateTo}&competitions=${competitions}`,
   );
-  if (!res.ok) {
-    return mockPollMatchPool(dateISO, today.dateLabel);
-  }
+  if (!res.ok) return empty;
 
   const mapped: TodayMatch[] = [];
   for (const raw of res.data.matches ?? []) {
     const code = (raw.competition?.code ?? "") as LeagueConfig["code"];
     const league = getLeagueByCode(code);
     if (!league) continue;
+    const status = String(raw.status ?? "");
+    // Solo partite reali ancora da giocare / live / finite di recente nel range
+    if (
+      !["TIMED", "SCHEDULED", "IN_PLAY", "PAUSED", "LIVE", "FINISHED"].includes(
+        status,
+      )
+    ) {
+      continue;
+    }
     const [item] = mapMatches([raw]);
     mapped.push({
       ...item,
@@ -793,9 +783,7 @@ export async function getPollMatchPool(): Promise<
   }
   mapped.sort((a, b) => +new Date(a.utcDate) - +new Date(b.utcDate));
 
-  if (!mapped.length) {
-    return mockPollMatchPool(dateISO, today.dateLabel);
-  }
+  if (!mapped.length) return empty;
 
   return {
     dateISO,
