@@ -228,7 +228,8 @@ function mapMatches(matches: ApiMatch[]): MatchItem[] {
 async function apiFetch<T>(
   path: string,
 ): Promise<{ ok: true; data: T } | { ok: false; status: number }> {
-  const token = process.env.FOOTBALL_DATA_API_TOKEN?.trim();
+  // Bracket access evita che Next.js “inlined” undefined a build-time
+  const token = (process.env["FOOTBALL_DATA_API_TOKEN"] ?? "").trim();
   if (!token) return { ok: false, status: 401 };
 
   const response = await fetch(`${API_BASE}${path}`, {
