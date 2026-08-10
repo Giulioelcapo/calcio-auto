@@ -27,8 +27,6 @@ import type {
 } from "./types";
 
 const API_BASE = "https://api.football-data.org/v4";
-/** ISR / fetch cache (secondi). Export usato dalle pagine. */
-export const DATA_REVALIDATE = 1800; // 30 min — free tier 10 req/min
 
 interface ApiTeam {
   id: number;
@@ -235,7 +233,8 @@ async function apiFetch<T>(
 
   const response = await fetch(`${API_BASE}${path}`, {
     headers: { "X-Auth-Token": token },
-    next: { revalidate: DATA_REVALIDATE },
+    // Runtime fetch: così su Vercel usa sempre il token Production
+    cache: "no-store",
   });
 
   if (!response.ok) return { ok: false, status: response.status };

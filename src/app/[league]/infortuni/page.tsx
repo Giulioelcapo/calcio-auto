@@ -7,7 +7,8 @@ import { injuriesIntro } from "@/lib/content-templates";
 import { getCompetitionBundle } from "@/lib/football-api";
 import { getAllLeagueSlugs } from "@/lib/leagues";
 
-export const revalidate = 1800;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 export function generateStaticParams() {
   return getAllLeagueSlugs().map((league) => ({ league }));
 }

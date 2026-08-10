@@ -7,7 +7,8 @@ import { teamIntro } from "@/lib/content-templates";
 import { getCompetitionBundle, getTeamPage } from "@/lib/football-api";
 import { getAllLeagueSlugs } from "@/lib/leagues";
 
-export const revalidate = 1800;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function generateStaticParams() {
   const params: Array<{ league: string; team: string }> = [];

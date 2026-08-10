@@ -9,7 +9,8 @@ import { getCompetitionBundle } from "@/lib/football-api";
 import { getAllLeagueSlugs } from "@/lib/leagues";
 import { SEASON_LABEL } from "@/lib/season";
 
-export const revalidate = 1800;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export function generateStaticParams() {
   return getAllLeagueSlugs().map((league) => ({ league }));
