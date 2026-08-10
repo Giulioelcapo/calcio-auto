@@ -49,6 +49,7 @@ export async function GET() {
       ok: res.ok,
       tokenLooksLikeStripe: token.startsWith("sk_"),
       tokenLength: token.length,
+      tokenPrefix: token.slice(0, 4),
       hint:
         res.status === 200
           ? "Token OK"
