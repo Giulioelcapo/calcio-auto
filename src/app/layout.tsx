@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     url: siteUrl(),
   },
   other: {
-    "google-adsense-account": adsenseClient() ?? "ca-pub-6747403673692656",
+    "google-adsense-account": adsenseClient() ?? "ca-pub-5512547544373777",
   },
   ...(verification
     ? { verification: { google: verification } }
