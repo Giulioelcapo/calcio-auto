@@ -28,10 +28,9 @@ export function MockBanner({ usingMock }: { usingMock: boolean }) {
   if (!usingMock) return null;
   return (
     <p className="rounded border border-[var(--warn)]/40 bg-[var(--warn)]/10 px-3 py-2 text-sm text-[var(--warn)]">
-      Modalità demo: token mancante oppure API football-data.org non disponibile
-      (account disabilitato, 403, rate limit). Controlla{" "}
-      <code>FOOTBALL_DATA_API_TOKEN</code> in <code>.env.local</code> e su
-      Vercel, poi riavvia / Redeploy.
+      Modalità demo temporanea: API free limitata (max 10 richieste/minuto) oppure
+      token non valido. Aspetta 1 minuto e ricarica, oppure controlla{" "}
+      <code>FOOTBALL_DATA_API_TOKEN</code> su Vercel.
     </p>
   );
 }

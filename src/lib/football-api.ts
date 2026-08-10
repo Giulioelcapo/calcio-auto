@@ -234,13 +234,19 @@ async function apiFetch<T>(
 
   const response = await fetch(`${API_BASE}${path}`, {
     headers: { "X-Auth-Token": token },
-    // Runtime fetch: così su Vercel usa sempre il token Production
-    cache: "no-store",
+    // Cache 15 min: free tier = 10 req/min, senza cache si va subito in 429
+    next: { revalidate: 900 },
   });
 
   if (!response.ok) return { ok: false, status: response.status };
   return { ok: true, data: (await response.json()) as T };
 }
+
+const BUNDLE_CACHE_TTL_MS = 10 * 60 * 1000;
+const bundleCache = new Map<
+  string,
+  { at: number; data: CompetitionBundle }
+>();
 
 function teamsFromStandings(standings: StandingRow[]): TeamSummary[] {
   return standings.map((row) => ({
@@ -340,31 +346,45 @@ export async function getCompetitionBundle(
   if (!league) return null;
   if (!hasApiToken()) return mockBundle(league);
 
+  const cached = bundleCache.get(slug);
+  if (
+    cached &&
+    Date.now() - cached.at < BUNDLE_CACHE_TTL_MS &&
+    !cached.data.usingMock
+  ) {
+    return cached.data;
+  }
+
+  const remember = (data: CompetitionBundle) => {
+    if (!data.usingMock) {
+      bundleCache.set(slug, { at: Date.now(), data });
+    }
+    return data;
+  };
+
+  const fallback = () =>
+    cached && !cached.data.usingMock ? cached.data : mockBundle(league);
+
   try {
     const q = seasonQuery();
-    const [compRes, standingsRes, matchesRes, teamsRes, scorersRes] =
-      await Promise.all([
-        apiFetch<ApiCompetitionResponse>(`/competitions/${league.code}`),
-        apiFetch<ApiStandingsResponse>(
-          `/competitions/${league.code}/standings${q}`,
-        ),
-        apiFetch<ApiMatchesResponse>(
-          `/competitions/${league.code}/matches${q}`,
-        ),
-        apiFetch<ApiTeamsResponse>(`/competitions/${league.code}/teams${q}`),
-        apiFetch<ApiScorersResponse>(
-          `/competitions/${league.code}/scorers${seasonQuery("limit=20")}`,
-        ),
-      ]);
+    // Solo 2 chiamate parallele (free tier 10/min). Scorers opzionale dopo.
+    const [standingsRes, matchesRes] = await Promise.all([
+      apiFetch<ApiStandingsResponse>(
+        `/competitions/${league.code}/standings${q}`,
+      ),
+      apiFetch<ApiMatchesResponse>(
+        `/competitions/${league.code}/matches${q}`,
+      ),
+    ]);
 
     let standingsData = standingsRes.ok ? standingsRes.data : null;
     let matchesData = matchesRes.ok ? matchesRes.data : null;
-    let teamsData = teamsRes.ok ? teamsRes.data : null;
-    let scorersData = scorersRes.ok ? scorersRes.data : null;
+    let scorersData: ApiScorersResponse | null = null;
 
     // Se season=2026 non risponde: NON usare la stagione precedente
     // (evita risultati 2025/26 passati come 2026/27).
     if (!standingsRes.ok) {
+      if (standingsRes.status === 429 && cached) return cached.data;
       const teamsOnly = await apiFetch<ApiTeamsResponse>(
         `/competitions/${league.code}/teams${q}`,
       );
@@ -386,15 +406,12 @@ export async function getCompetitionBundle(
           goalDifference: 0,
           form: null,
         }));
-        return {
+        return remember({
           league,
           meta: {
             ...emptyMeta(league),
-            emblem: (compRes.ok ? compRes.data.emblem : null) ?? league.emblem,
-            flag:
-              (compRes.ok ? compRes.data.area?.flag : null) ??
-              league.flag ??
-              null,
+            emblem: league.emblem,
+            flag: league.flag ?? null,
             currentMatchday: null,
           },
           matchday: null,
@@ -426,9 +443,9 @@ export async function getCompetitionBundle(
             },
           ],
           usingMock: false,
-        };
+        });
       }
-      return mockBundle(league);
+      return fallback();
     }
 
     // Stagione API troppo vecchia rispetto al target 2026 → mock pre-stagione
@@ -447,9 +464,13 @@ export async function getCompetitionBundle(
       matchesData ? mapMatches(matchesData.matches ?? []) : [],
     );
 
-    const teams = teamsData
-      ? (teamsData.teams ?? []).map(mapTeam)
-      : teamsFromStandings(totalTable);
+    const teams = teamsFromStandings(totalTable);
+
+    // Scorers: 1 chiamata in più, non blocca se fallisce (rate limit)
+    const scorersRes = await apiFetch<ApiScorersResponse>(
+      `/competitions/${league.code}/scorers${seasonQuery("limit=20")}`,
+    );
+    if (scorersRes.ok) scorersData = scorersRes.data;
 
     let scorers: ScorerRow[] = [];
     let scorersAvailable = false;
@@ -468,34 +489,19 @@ export async function getCompetitionBundle(
       }));
     }
 
-    const season =
-      standingsData?.season ??
-      (compRes.ok ? compRes.data.currentSeason : undefined);
+    const season = standingsData?.season;
 
     const meta: CompetitionMeta = {
-      id:
-        standingsData?.competition?.id ??
-        (compRes.ok ? (compRes.data.id ?? null) : null),
-      emblem:
-        standingsData?.competition?.emblem ??
-        (compRes.ok ? compRes.data.emblem : null) ??
-        league.emblem,
-      flag:
-        standingsData?.area?.flag ??
-        (compRes.ok ? compRes.data.area?.flag : null) ??
-        league.flag ??
-        null,
-      currentMatchday:
-        season?.currentMatchday ??
-        (compRes.ok
-          ? (compRes.data.currentSeason?.currentMatchday ?? null)
-          : null),
+      id: standingsData?.competition?.id ?? null,
+      emblem: standingsData?.competition?.emblem ?? league.emblem,
+      flag: standingsData?.area?.flag ?? league.flag ?? null,
+      currentMatchday: season?.currentMatchday ?? null,
       startDate: season?.startDate ?? null,
       endDate: season?.endDate ?? null,
       winnerName: season?.winner?.name ?? null,
     };
 
-    return {
+    return remember({
       league,
       meta,
       matchday: meta.currentMatchday,
@@ -511,9 +517,9 @@ export async function getCompetitionBundle(
       insights: buildLeagueInsights(totalTable),
       injuryInsights: buildInjuryInsights(totalTable, allMatches),
       usingMock: false,
-    };
+    });
   } catch {
-    return mockBundle(league);
+    return fallback();
   }
 }
 
