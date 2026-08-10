@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Barlow_Condensed, IBM_Plex_Sans } from "next/font/google";
-import { AdsenseLoader } from "@/components/AdsenseLoader";
 import { CookieBanner } from "@/components/CookieBanner";
 import { Footer, Header } from "@/components/Header";
 import {
@@ -25,6 +24,7 @@ const data = Barlow_Condensed({
 });
 
 const verification = googleSiteVerification();
+const adsense = adsenseClient() ?? "ca-pub-5512547544373777";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     url: siteUrl(),
   },
   other: {
-    "google-adsense-account": adsenseClient() ?? "ca-pub-5512547544373777",
+    "google-adsense-account": adsense,
   },
   ...(verification
     ? { verification: { google: verification } }
@@ -56,8 +56,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="it" className={`${display.variable} ${data.variable} h-full`}>
+      <head>
+        {/* Snippet esatto richiesto da AdSense per la verifica */}
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsense}`}
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="flex min-h-full flex-col antialiased">
-        <AdsenseLoader />
         <Header />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
           {children}
