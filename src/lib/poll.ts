@@ -2,15 +2,21 @@ import { promises as fs } from "fs";
 import path from "path";
 import { getPollMatchPool } from "@/lib/football-api";
 import type { TodayMatch } from "@/lib/types";
-import type { PollCandidate, PollState } from "@/lib/poll-types";
+import type {
+  PollCandidate,
+  PollMatchVotes,
+  PollSide,
+  PollState,
+} from "@/lib/poll-types";
 
-type DayVotes = Record<string, number>;
+type DayVotes = Record<string, PollMatchVotes>;
 type FileStore = Record<string, DayVotes>;
+type VotedMap = Record<string, PollSide>;
 
 const FEATURED_COUNT = 4;
 
 export function cookieName(dateISO: string) {
-  return `ca_poll_match_${dateISO}`;
+  return `ca_poll_sides_${dateISO}`;
 }
 
 function storeFilePath() {
@@ -40,13 +46,29 @@ async function writeFileStore(store: FileStore): Promise<void> {
 
 async function getDayVotes(dateISO: string): Promise<DayVotes> {
   const store = await readFileStore();
-  return { ...(store[dateISO] ?? {}) };
+  const day = store[dateISO] ?? {};
+  const normalized: DayVotes = {};
+  for (const [matchId, value] of Object.entries(day)) {
+    if (value && typeof value === "object" && "home" in value) {
+      normalized[matchId] = {
+        home: Number(value.home) || 0,
+        away: Number(value.away) || 0,
+      };
+    }
+  }
+  return normalized;
 }
 
-async function addVote(dateISO: string, matchId: string): Promise<void> {
+async function addSideVote(
+  dateISO: string,
+  matchId: string,
+  side: PollSide,
+): Promise<void> {
   const store = await readFileStore();
-  const day = { ...(store[dateISO] ?? {}) };
-  day[matchId] = (day[matchId] ?? 0) + 1;
+  const day: DayVotes = { ...(await getDayVotes(dateISO)) };
+  const current = day[matchId] ?? { home: 0, away: 0 };
+  current[side] += 1;
+  day[matchId] = current;
   store[dateISO] = day;
   const keys = Object.keys(store).sort();
   while (keys.length > 14) {
@@ -71,7 +93,11 @@ function pickDailyMatches(matches: TodayMatch[], dateISO: string): TodayMatch[] 
   return arr.slice(0, Math.min(FEATURED_COUNT, arr.length));
 }
 
-function toCandidate(match: TodayMatch, votes: number): PollCandidate {
+function toCandidate(
+  match: TodayMatch,
+  votes: PollMatchVotes,
+  votedSide: PollSide | null,
+): PollCandidate {
   return {
     id: String(match.id),
     homeTeam: match.homeTeam,
@@ -84,57 +110,84 @@ function toCandidate(match: TodayMatch, votes: number): PollCandidate {
     homeScore: match.homeScore,
     awayScore: match.awayScore,
     votes,
+    votedSide,
   };
 }
 
+export function parseVotedMap(raw: string | undefined): VotedMap {
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw) as VotedMap;
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
 export async function buildPollState(
-  votedId: string | null = null,
+  votedMap: VotedMap = {},
 ): Promise<PollState> {
   const pool = await getPollMatchPool();
   const votes = await getDayVotes(pool.dateISO);
   const featured = pickDailyMatches(pool.matches, pool.dateISO);
-  const candidates = featured
-    .map((m) => toCandidate(m, votes[String(m.id)] ?? 0))
-    .sort(
-      (a, b) => b.votes - a.votes || a.homeTeam.localeCompare(b.homeTeam, "it"),
+  const candidates = featured.map((m) => {
+    const id = String(m.id);
+    return toCandidate(
+      m,
+      votes[id] ?? { home: 0, away: 0 },
+      votedMap[id] ?? null,
     );
+  });
+
+  const totalVotes = candidates.reduce(
+    (sum, c) => sum + c.votes.home + c.votes.away,
+    0,
+  );
 
   return {
     dateISO: pool.dateISO,
     title:
       pool.mode === "today"
-        ? `Partita della giornata · ${pool.dateLabel}`
-        : `Partita in evidenza · prossimi match · ${pool.dateLabel}`,
+        ? `Chi merita di più? · ${pool.dateLabel}`
+        : `Chi merita di più? · prossimi match · ${pool.dateLabel}`,
     candidates,
-    totalVotes: candidates.reduce((sum, c) => sum + c.votes, 0),
-    votedId,
+    totalVotes,
   };
 }
 
 export async function castPollVote(
   matchId: string,
-  alreadyVotedId: string | null,
+  side: PollSide,
+  votedMap: VotedMap,
 ): Promise<
-  | { ok: true; state: PollState; cookieKey: string; cookieValue: string }
+  | {
+      ok: true;
+      state: PollState;
+      cookieKey: string;
+      cookieValue: string;
+    }
   | { ok: false; error: string }
 > {
-  const preview = await buildPollState(alreadyVotedId);
-  if (!preview.candidates.length) {
-    return { ok: false, error: "Nessuna partita disponibile per votare." };
+  if (side !== "home" && side !== "away") {
+    return { ok: false, error: "Scelta non valida." };
   }
+
+  const preview = await buildPollState(votedMap);
   if (!preview.candidates.some((c) => c.id === matchId)) {
     return { ok: false, error: "Partita non in sondaggio." };
   }
-  if (alreadyVotedId) {
-    return { ok: false, error: "Hai già votato oggi su questo dispositivo." };
+  if (votedMap[matchId]) {
+    return { ok: false, error: "Hai già votato questa partita oggi." };
   }
 
-  await addVote(preview.dateISO, matchId);
-  const state = await buildPollState(matchId);
+  await addSideVote(preview.dateISO, matchId, side);
+  const nextVoted = { ...votedMap, [matchId]: side };
+  const state = await buildPollState(nextVoted);
+
   return {
     ok: true,
     state,
     cookieKey: cookieName(preview.dateISO),
-    cookieValue: matchId,
+    cookieValue: JSON.stringify(nextVoted),
   };
 }

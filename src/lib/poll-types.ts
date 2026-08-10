@@ -1,3 +1,10 @@
+export type PollSide = "home" | "away";
+
+export type PollMatchVotes = {
+  home: number;
+  away: number;
+};
+
 export type PollCandidate = {
   id: string;
   homeTeam: string;
@@ -9,7 +16,8 @@ export type PollCandidate = {
   status: string;
   homeScore: number | null;
   awayScore: number | null;
-  votes: number;
+  votes: PollMatchVotes;
+  votedSide: PollSide | null;
 };
 
 export type PollState = {
@@ -17,5 +25,4 @@ export type PollState = {
   title: string;
   candidates: PollCandidate[];
   totalVotes: number;
-  votedId: string | null;
 };

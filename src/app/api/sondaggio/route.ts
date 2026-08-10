@@ -1,32 +1,42 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { buildPollState, castPollVote, cookieName } from "@/lib/poll";
+import {
+  buildPollState,
+  castPollVote,
+  cookieName,
+  parseVotedMap,
+} from "@/lib/poll";
+import type { PollSide } from "@/lib/poll-types";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const preview = await buildPollState({});
   const jar = await cookies();
-  const preview = await buildPollState(null);
-  const votedId = jar.get(cookieName(preview.dateISO))?.value ?? null;
-  if (!votedId) return NextResponse.json(preview);
-  return NextResponse.json(await buildPollState(votedId));
+  const votedMap = parseVotedMap(jar.get(cookieName(preview.dateISO))?.value);
+  return NextResponse.json(await buildPollState(votedMap));
 }
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
-    teamId?: string;
     matchId?: string;
+    side?: PollSide;
   } | null;
-  const matchId = (body?.matchId ?? body?.teamId)?.trim();
-  if (!matchId) {
-    return NextResponse.json({ error: "matchId mancante" }, { status: 400 });
+
+  const matchId = body?.matchId?.trim();
+  const side = body?.side;
+  if (!matchId || (side !== "home" && side !== "away")) {
+    return NextResponse.json(
+      { error: "Servono matchId e side (home|away)" },
+      { status: 400 },
+    );
   }
 
   const jar = await cookies();
-  const preview = await buildPollState(null);
-  const already = jar.get(cookieName(preview.dateISO))?.value ?? null;
+  const preview = await buildPollState({});
+  const votedMap = parseVotedMap(jar.get(cookieName(preview.dateISO))?.value);
+  const result = await castPollVote(matchId, side, votedMap);
 
-  const result = await castPollVote(matchId, already);
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }

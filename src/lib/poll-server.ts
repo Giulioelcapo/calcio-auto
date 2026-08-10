@@ -1,9 +1,9 @@
 import { cookies } from "next/headers";
-import { buildPollState, cookieName } from "@/lib/poll";
+import { buildPollState, cookieName, parseVotedMap } from "@/lib/poll";
 
 export async function getServerPollState() {
-  const preview = await buildPollState(null);
+  const preview = await buildPollState({});
   const jar = await cookies();
-  const votedId = jar.get(cookieName(preview.dateISO))?.value ?? null;
-  return buildPollState(votedId);
+  const votedMap = parseVotedMap(jar.get(cookieName(preview.dateISO))?.value);
+  return buildPollState(votedMap);
 }

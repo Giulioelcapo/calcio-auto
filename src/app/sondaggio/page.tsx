@@ -24,7 +24,7 @@ export default async function SondaggioPage() {
           Mini-gioco
         </p>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          Partita della giornata
+          Chi merita di più?
         </h1>
         <p className="max-w-2xl text-sm text-[var(--muted)]">{poll.title}</p>
       </section>
