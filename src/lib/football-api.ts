@@ -130,7 +130,7 @@ interface ApiTeamDetailResponse extends ApiTeam {
 }
 
 function hasApiToken(): boolean {
-  return Boolean(process.env.FOOTBALL_DATA_API_TOKEN?.trim());
+  return Boolean((process.env["FOOTBALL_DATA_API_TOKEN"] ?? "").trim());
 }
 
 function seasonLabelFromApi(season?: {
