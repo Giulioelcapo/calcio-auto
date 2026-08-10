@@ -2,6 +2,8 @@
 
 Blog/web app calcio automatico, SEO-first, pronto per Google AdSense.
 
+**Live:** https://calcio-auto.vercel.app
+
 ## Avvio locale
 
 ```bash
@@ -13,54 +15,50 @@ npm run dev
 
 Apri http://localhost:3000
 
-## Checklist per guadagnare (ordine)
+## Checklist go-live (ordine)
 
 ### 1) Token dati reali
-1. Registrati su https://www.football-data.org/client/register
-2. Metti il token in `.env.local` → `FOOTBALL_DATA_API_TOKEN=`
+Già attivo su Vercel: `FOOTBALL_DATA_API_TOKEN`.
 
-### 2) Email e sito
-In `.env.local`:
-```env
-NEXT_PUBLIC_CONTACT_EMAIL=tua-email@dominio.it
-NEXT_PUBLIC_SITE_URL=https://tuodominio.it
-```
+### 2) URL + email su Vercel
+In **Settings → Environment Variables** (Production), aggiungi/aggiorna:
 
-### 3) Deploy su Vercel (gratis)
-1. Crea account su https://vercel.com
-2. Push del progetto su GitHub (o importa la cartella)
-3. New Project → seleziona il repo → Deploy
-4. In Vercel → Settings → Environment Variables aggiungi le stesse di `.env.local`
-5. Collega un dominio (Domains)
+| Key | Value |
+|-----|--------|
+| `NEXT_PUBLIC_SITE_URL` | `https://calcio-auto.vercel.app` |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | la tua email reale |
 
-### 4) Google Search Console
+Poi **Redeploy** (senza build cache se hai dubbi).
+
+### 3) Google Search Console
 1. https://search.google.com/search-console
-2. Aggiungi proprietà URL del dominio
-3. Invia sitemap: `https://tuodominio.it/sitemap.xml`
+2. **Aggiungi proprietà** → prefisso URL → `https://calcio-auto.vercel.app`
+3. Verifica (meta tag HTML):
+   - copia il codice `content="...."`
+   - su Vercel aggiungi `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=quelcodice`
+   - Redeploy → Completa verifica in Search Console
+4. **Sitemaps** → invia: `https://calcio-auto.vercel.app/sitemap.xml`
 
-### 5) Google AdSense
-1. https://www.google.com/adsense/ — richiedi il sito
+### 4) Google AdSense
+1. https://www.google.com/adsense/ — richiedi il sito `https://calcio-auto.vercel.app`
 2. Attendi approvazione (giorni/settimane)
-3. Crea 3 unità annuncio Display responsive (Top / Side / In-content)
-4. In Vercel env:
+3. Crea 3 unità Display responsive (Top / Side / In-content)
+4. Su Vercel:
 ```env
 NEXT_PUBLIC_ADSENSE_CLIENT_ID=ca-pub-xxxxxxxx
 NEXT_PUBLIC_ADSENSE_SLOT_TOP=1234567890
 NEXT_PUBLIC_ADSENSE_SLOT_SIDE=1234567890
 NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT=1234567890
 ```
-5. Redeploy
+5. Redeploy — `ads.txt` si aggiorna da solo su `/ads.txt`
 
-Il sito carica AdSense **solo dopo** “Accetta” nel banner cookie.
+Il sito carica gli annunci **solo dopo** “Accetta” nel banner cookie.
 
-## Pagine legali già pronte
-- `/chi-siamo`
-- `/contatti`
-- `/privacy`
-- `/cookie`
+## Pagine legali
+- `/chi-siamo` `/contatti` `/privacy` `/cookie`
 
 ## Campionati free
 Premier League, Championship, Bundesliga, Serie A, La Liga, Ligue 1, Eredivisie, Primeira Liga, Brasileirão, Champions League, Mondiali, Europeo.
 
 ## Note AdSense
-Google può rifiutare siti troppo “automatici”. Tieni aggiornati i dati reali, testi descrittivi e pagine legali. Non mettere troppi ads su pagine vuote pre-stagione.
+Google può rifiutare siti troppo “automatici”. Tieni dati reali, testi descrittivi e pagine legali. Non mettere troppi ads su pagine vuote pre-stagione.

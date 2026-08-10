@@ -3,7 +3,12 @@ import { Barlow_Condensed, IBM_Plex_Sans } from "next/font/google";
 import { AdsenseLoader } from "@/components/AdsenseLoader";
 import { CookieBanner } from "@/components/CookieBanner";
 import { Footer, Header } from "@/components/Header";
-import { SITE_NAME, SITE_TAGLINE, siteUrl } from "@/lib/site";
+import {
+  SITE_NAME,
+  SITE_TAGLINE,
+  googleSiteVerification,
+  siteUrl,
+} from "@/lib/site";
 import "./globals.css";
 
 const display = IBM_Plex_Sans({
@@ -17,6 +22,8 @@ const data = Barlow_Condensed({
   subsets: ["latin"],
   weight: ["500", "600", "700"],
 });
+
+const verification = googleSiteVerification();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
@@ -33,6 +40,9 @@ export const metadata: Metadata = {
     locale: "it_IT",
     url: siteUrl(),
   },
+  ...(verification
+    ? { verification: { google: verification } }
+    : {}),
 };
 
 export default function RootLayout({
