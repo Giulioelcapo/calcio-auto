@@ -38,12 +38,13 @@ export async function GET() {
               ? "Token malformato"
               : `Errore API ${res.status}`,
     });
-  } catch {
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "unknown";
     return NextResponse.json({
       configured: true,
       status: null,
       ok: false,
-      hint: "Fetch API fallita",
+      hint: `Fetch API fallita: ${message.slice(0, 160)}`,
     });
   }
 }

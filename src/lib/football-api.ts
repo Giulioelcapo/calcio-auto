@@ -713,6 +713,46 @@ export async function getTodaysMatches(): Promise<TodaysMatchesResult> {
   };
 }
 
+/** Fallback sondaggio se l'API calcio non risponde. */
+function mockPollMatchPool(
+  dateISO: string,
+  dateLabel: string,
+): TodaysMatchesResult & { mode: "upcoming" } {
+  const poolLeagues = LEAGUES.filter(
+    (l) => l.code !== "WC" && l.code !== "EC",
+  ).slice(0, 6);
+  const matches: TodayMatch[] = [];
+  let slot = 0;
+  for (const league of poolLeagues) {
+    const mock = buildMockMatches(league).slice(0, 2);
+    for (const m of mock) {
+      const kickoff = new Date(`${dateISO}T12:00:00.000Z`);
+      kickoff.setUTCHours(15 + slot, (slot % 2) * 30, 0, 0);
+      matches.push({
+        ...m,
+        // id stabile per giorno + lega, così i voti Redis restano allineati
+        id: Number(`${dateISO.replaceAll("-", "")}${m.id}`.slice(0, 12)),
+        utcDate: kickoff.toISOString(),
+        status: "TIMED",
+        homeScore: null,
+        awayScore: null,
+        leagueName: league.name,
+        leagueSlug: league.slug,
+        leagueCode: league.code,
+      });
+      slot += 1;
+    }
+  }
+  matches.sort((a, b) => +new Date(a.utcDate) - +new Date(b.utcDate));
+  return {
+    dateISO,
+    dateLabel,
+    matches,
+    usingMock: true,
+    mode: "upcoming",
+  };
+}
+
 /**
  * Pool per sondaggio: partite di oggi, oppure prossimi giorni se oggi è vuoto.
  */
@@ -725,7 +765,7 @@ export async function getPollMatchPool(): Promise<
   }
 
   if (!hasApiToken()) {
-    return { ...today, mode: "today" };
+    return mockPollMatchPool(today.dateISO, today.dateLabel);
   }
 
   const dateISO = today.dateISO;
@@ -734,7 +774,9 @@ export async function getPollMatchPool(): Promise<
   const res = await apiFetch<ApiMatchesResponse>(
     `/matches?dateFrom=${dateISO}&dateTo=${dateTo}&competitions=${competitions}`,
   );
-  if (!res.ok) return { ...today, mode: "today" };
+  if (!res.ok) {
+    return mockPollMatchPool(dateISO, today.dateLabel);
+  }
 
   const mapped: TodayMatch[] = [];
   for (const raw of res.data.matches ?? []) {
@@ -751,7 +793,9 @@ export async function getPollMatchPool(): Promise<
   }
   mapped.sort((a, b) => +new Date(a.utcDate) - +new Date(b.utcDate));
 
-  if (!mapped.length) return { ...today, mode: "today" };
+  if (!mapped.length) {
+    return mockPollMatchPool(dateISO, today.dateLabel);
+  }
 
   return {
     dateISO,
