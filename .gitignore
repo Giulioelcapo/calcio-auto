@@ -37,6 +37,8 @@ yarn-error.log*
 # vercel
 .vercel
 
+# poll vote persistence (local)
+/data/poll-votes.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts

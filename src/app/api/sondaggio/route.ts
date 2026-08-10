@@ -1,11 +1,15 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { buildPollState, castPollVote } from "@/lib/poll";
+import { buildPollState, castPollVote, cookieName } from "@/lib/poll";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const state = await buildPollState();
-  return NextResponse.json(state);
+  const jar = await cookies();
+  const preview = await buildPollState(null);
+  const votedId = jar.get(cookieName(preview.dateISO))?.value ?? null;
+  if (!votedId) return NextResponse.json(preview);
+  return NextResponse.json(await buildPollState(votedId));
 }
 
 export async function POST(request: Request) {
@@ -18,9 +22,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "matchId mancante" }, { status: 400 });
   }
 
-  const result = await castPollVote(matchId);
+  const jar = await cookies();
+  const preview = await buildPollState(null);
+  const already = jar.get(cookieName(preview.dateISO))?.value ?? null;
+
+  const result = await castPollVote(matchId, already);
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
-  return NextResponse.json(result.state);
+
+  const response = NextResponse.json(result.state);
+  response.cookies.set(result.cookieKey, result.cookieValue, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 36,
+    secure: process.env.VERCEL === "1",
+  });
+  return response;
 }

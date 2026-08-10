@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AdSlot } from "@/components/AdSlot";
 import { PollPanel } from "@/components/PollPanel";
-import { buildPollState } from "@/lib/poll";
+import { getServerPollState } from "@/lib/poll-server";
 import { SITE_NAME } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function SondaggioPage() {
-  const poll = await buildPollState();
+  const poll = await getServerPollState();
 
   return (
     <div className="space-y-6">

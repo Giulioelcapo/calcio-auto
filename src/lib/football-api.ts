@@ -709,6 +709,55 @@ export async function getTodaysMatches(): Promise<TodaysMatchesResult> {
   };
 }
 
+/**
+ * Pool per sondaggio: partite di oggi, oppure prossimi giorni se oggi è vuoto.
+ */
+export async function getPollMatchPool(): Promise<
+  TodaysMatchesResult & { mode: "today" | "upcoming" }
+> {
+  const today = await getTodaysMatches();
+  if (today.matches.length >= 2) {
+    return { ...today, mode: "today" };
+  }
+
+  if (!hasApiToken()) {
+    return { ...today, mode: "today" };
+  }
+
+  const dateISO = today.dateISO;
+  const dateTo = shiftIsoDate(dateISO, 10);
+  const competitions = LEAGUES.map((l) => l.code).join(",");
+  const res = await apiFetch<ApiMatchesResponse>(
+    `/matches?dateFrom=${dateISO}&dateTo=${dateTo}&competitions=${competitions}`,
+  );
+  if (!res.ok) return { ...today, mode: "today" };
+
+  const mapped: TodayMatch[] = [];
+  for (const raw of res.data.matches ?? []) {
+    const code = (raw.competition?.code ?? "") as LeagueConfig["code"];
+    const league = getLeagueByCode(code);
+    if (!league) continue;
+    const [item] = mapMatches([raw]);
+    mapped.push({
+      ...item,
+      leagueName: league.name,
+      leagueSlug: league.slug,
+      leagueCode: league.code,
+    });
+  }
+  mapped.sort((a, b) => +new Date(a.utcDate) - +new Date(b.utcDate));
+
+  if (!mapped.length) return { ...today, mode: "today" };
+
+  return {
+    dateISO,
+    dateLabel: today.dateLabel,
+    matches: mapped,
+    usingMock: false,
+    mode: "upcoming",
+  };
+}
+
 export type LeagueScorersBlock = {
   leagueName: string;
   leagueSlug: string;

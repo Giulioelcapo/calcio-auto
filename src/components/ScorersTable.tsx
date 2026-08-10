@@ -6,7 +6,6 @@ export function ScorersTable({ rows }: { rows: ScorerRow[] }) {
     return (
       <div className="fm-panel p-4 text-sm text-[var(--muted)]">
         Marcatori non disponibili nel piano free corrente (serve spesso Deep Data).
-        Sezione SEO pronta.
       </div>
     );
   }

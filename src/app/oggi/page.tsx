@@ -135,11 +135,6 @@ export default async function OggiPage() {
       ) : null}
 
       <AdSlot slot="in-content" />
-
-      <p className="text-sm text-[var(--muted)]">
-        Pagina SEO aggiornata ogni giorno: ideale per chi cerca “partite di oggi”
-        e risultati in tempo quasi reale.
-      </p>
     </div>
   );
 }

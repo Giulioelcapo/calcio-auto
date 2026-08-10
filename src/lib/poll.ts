@@ -1,37 +1,67 @@
-import { cookies } from "next/headers";
-import { getTodaysMatches } from "@/lib/football-api";
+import { promises as fs } from "fs";
+import path from "path";
+import { getPollMatchPool } from "@/lib/football-api";
 import type { TodayMatch } from "@/lib/types";
 import type { PollCandidate, PollState } from "@/lib/poll-types";
 
-type Store = {
-  dateISO: string;
-  votes: Record<string, number>;
-};
-
-declare global {
-  // eslint-disable-next-line no-var
-  var __calcioautoPollStore: Store | undefined;
-}
+type DayVotes = Record<string, number>;
+type FileStore = Record<string, DayVotes>;
 
 const FEATURED_COUNT = 4;
 
-function cookieName(dateISO: string) {
+export function cookieName(dateISO: string) {
   return `ca_poll_match_${dateISO}`;
 }
 
-function getStore(dateISO: string): Store {
-  const current = globalThis.__calcioautoPollStore;
-  if (!current || current.dateISO !== dateISO) {
-    globalThis.__calcioautoPollStore = { dateISO, votes: {} };
-  }
-  return globalThis.__calcioautoPollStore!;
+function storeFilePath() {
+  if (process.env.VERCEL) return "/tmp/calcioauto-poll-votes.json";
+  return path.join(process.cwd(), "data", "poll-votes.json");
 }
 
-/** Shuffle stabile per giorno: stesse partite per tutti oggi. */
+async function readFileStore(): Promise<FileStore> {
+  try {
+    const raw = await fs.readFile(storeFilePath(), "utf8");
+    const parsed = JSON.parse(raw) as FileStore;
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+async function writeFileStore(store: FileStore): Promise<void> {
+  const file = storeFilePath();
+  if (!process.env.VERCEL) {
+    await fs.mkdir(path.dirname(file), { recursive: true });
+  }
+  const tmp = `${file}.${process.pid}.${Date.now()}.tmp`;
+  await fs.writeFile(tmp, JSON.stringify(store), "utf8");
+  await fs.rename(tmp, file);
+}
+
+async function getDayVotes(dateISO: string): Promise<DayVotes> {
+  const store = await readFileStore();
+  return { ...(store[dateISO] ?? {}) };
+}
+
+async function addVote(dateISO: string, matchId: string): Promise<void> {
+  const store = await readFileStore();
+  const day = { ...(store[dateISO] ?? {}) };
+  day[matchId] = (day[matchId] ?? 0) + 1;
+  store[dateISO] = day;
+  const keys = Object.keys(store).sort();
+  while (keys.length > 14) {
+    const old = keys.shift();
+    if (old) delete store[old];
+  }
+  await writeFileStore(store);
+}
+
 function pickDailyMatches(matches: TodayMatch[], dateISO: string): TodayMatch[] {
   if (!matches.length) return [];
   let seed = 0;
-  for (let i = 0; i < dateISO.length; i++) seed = (seed * 31 + dateISO.charCodeAt(i)) >>> 0;
+  for (let i = 0; i < dateISO.length; i++) {
+    seed = (seed * 31 + dateISO.charCodeAt(i)) >>> 0;
+  }
   const arr = [...matches];
   for (let i = arr.length - 1; i > 0; i--) {
     seed = (seed * 1664525 + 1013904223) >>> 0;
@@ -57,20 +87,24 @@ function toCandidate(match: TodayMatch, votes: number): PollCandidate {
   };
 }
 
-export async function buildPollState(): Promise<PollState> {
-  const today = await getTodaysMatches();
-  const store = getStore(today.dateISO);
-  const jar = await cookies();
-  const votedId = jar.get(cookieName(today.dateISO))?.value ?? null;
-
-  const featured = pickDailyMatches(today.matches, today.dateISO);
+export async function buildPollState(
+  votedId: string | null = null,
+): Promise<PollState> {
+  const pool = await getPollMatchPool();
+  const votes = await getDayVotes(pool.dateISO);
+  const featured = pickDailyMatches(pool.matches, pool.dateISO);
   const candidates = featured
-    .map((m) => toCandidate(m, store.votes[String(m.id)] ?? 0))
-    .sort((a, b) => b.votes - a.votes || a.homeTeam.localeCompare(b.homeTeam, "it"));
+    .map((m) => toCandidate(m, votes[String(m.id)] ?? 0))
+    .sort(
+      (a, b) => b.votes - a.votes || a.homeTeam.localeCompare(b.homeTeam, "it"),
+    );
 
   return {
-    dateISO: today.dateISO,
-    title: `Partita della giornata · ${today.dateLabel}`,
+    dateISO: pool.dateISO,
+    title:
+      pool.mode === "today"
+        ? `Partita della giornata · ${pool.dateLabel}`
+        : `Partita in evidenza · prossimi match · ${pool.dateLabel}`,
     candidates,
     totalVotes: candidates.reduce((sum, c) => sum + c.votes, 0),
     votedId,
@@ -79,28 +113,28 @@ export async function buildPollState(): Promise<PollState> {
 
 export async function castPollVote(
   matchId: string,
-): Promise<{ ok: true; state: PollState } | { ok: false; error: string }> {
-  const state = await buildPollState();
-  if (!state.candidates.length) {
-    return { ok: false, error: "Nessuna partita oggi: sondaggio chiuso." };
+  alreadyVotedId: string | null,
+): Promise<
+  | { ok: true; state: PollState; cookieKey: string; cookieValue: string }
+  | { ok: false; error: string }
+> {
+  const preview = await buildPollState(alreadyVotedId);
+  if (!preview.candidates.length) {
+    return { ok: false, error: "Nessuna partita disponibile per votare." };
   }
-  if (!state.candidates.some((c) => c.id === matchId)) {
-    return { ok: false, error: "Partita non in sondaggio oggi." };
+  if (!preview.candidates.some((c) => c.id === matchId)) {
+    return { ok: false, error: "Partita non in sondaggio." };
   }
-  if (state.votedId) {
+  if (alreadyVotedId) {
     return { ok: false, error: "Hai già votato oggi su questo dispositivo." };
   }
 
-  const store = getStore(state.dateISO);
-  store.votes[matchId] = (store.votes[matchId] ?? 0) + 1;
-
-  const jar = await cookies();
-  jar.set(cookieName(state.dateISO), matchId, {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 36,
-  });
-
-  return { ok: true, state: await buildPollState() };
+  await addVote(preview.dateISO, matchId);
+  const state = await buildPollState(matchId);
+  return {
+    ok: true,
+    state,
+    cookieKey: cookieName(preview.dateISO),
+    cookieValue: matchId,
+  };
 }

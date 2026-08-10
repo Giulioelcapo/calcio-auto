@@ -3,18 +3,18 @@ import { AdSlot } from "@/components/AdSlot";
 import { PollPanel } from "@/components/PollPanel";
 import { listLeagues } from "@/lib/football-api";
 import { getFootballNews } from "@/lib/news";
-import { buildPollState } from "@/lib/poll";
+import { getServerPollState } from "@/lib/poll-server";
 
 export default async function HomePage() {
   const leagues = listLeagues();
   const news = await getFootballNews(6);
-  const poll = await buildPollState();
+  const poll = await getServerPollState();
 
   return (
     <div className="space-y-8">
       <section className="space-y-3">
         <p className="text-xs uppercase tracking-[0.25em] text-[var(--muted)]">
-          Programmatic SEO · Zero gestione manuale
+          Hub calcio automatico
         </p>
         <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
           <span className="text-[var(--accent)]">CalcioAuto</span>

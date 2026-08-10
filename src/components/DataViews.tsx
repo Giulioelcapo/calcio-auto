@@ -111,7 +111,7 @@ export function ScorersTable({ rows }: { rows: ScorerRow[] }) {
   if (!rows.length) {
     return (
       <p className="text-sm text-[var(--muted)]">
-        Marcatori non disponibili sul piano free (endpoint spesso 403). Sezione SEO pronta.
+        Marcatori non disponibili sul piano free (endpoint spesso 403).
       </p>
     );
   }

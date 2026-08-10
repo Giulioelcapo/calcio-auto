@@ -34,7 +34,7 @@ export function PollPanel({
       const res = await fetch("/api/sondaggio", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ teamId: matchId }),
+        body: JSON.stringify({ matchId }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -67,6 +67,15 @@ export function PollPanel({
         Totale: {state.totalVotes}
       </p>
       {error ? <p className="text-sm text-[var(--warn)]">{error}</p> : null}
+      {!state.votedId ? (
+        <p className="text-xs text-[var(--accent)]">
+          Tocca Vota su una partita per esprimere il tuo voto.
+        </p>
+      ) : (
+        <p className="text-xs text-[var(--muted)]">
+          Voto salvato. I totali restano visibili a tutti.
+        </p>
+      )}
       <div
         className={`grid gap-3 ${compact ? "sm:grid-cols-2" : "sm:grid-cols-2"}`}
       >
