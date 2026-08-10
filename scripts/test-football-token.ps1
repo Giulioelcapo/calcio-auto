@@ -18,7 +18,6 @@ if (-not $token) {
 Write-Host ""
 Write-Host ("Lunghezza: {0}" -f $token.Length)
 Write-Host ("Inizia con sk_ ? {0}" -f ($token.StartsWith("sk_")))
-Write-Host ("Uguale al token vecchio disabilitato? {0}" -f ($token -eq "1bd7a350e0524f93a316a8936cc11518"))
 
 try {
   $res = Invoke-WebRequest -Uri "https://api.football-data.org/v4/competitions/SA" -Headers @{ "X-Auth-Token" = $token } -UseBasicParsing
