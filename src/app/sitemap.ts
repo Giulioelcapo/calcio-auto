@@ -21,6 +21,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "hourly",
       priority: 0.9,
     },
+    {
+      url: `${base}/gol`,
+      lastModified: now,
+      changeFrequency: "hourly",
+      priority: 0.9,
+    },
+    {
+      url: `${base}/sondaggio`,
+      lastModified: now,
+      changeFrequency: "hourly",
+      priority: 0.85,
+    },
   ];
 
   for (const path of LEGAL) {

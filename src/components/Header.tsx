@@ -31,12 +31,24 @@ export async function Header() {
             Oggi
           </Link>
           <Link
+            href="/gol"
+            className="whitespace-nowrap rounded px-2 py-1 font-medium text-[var(--accent)] hover:bg-white/5"
+          >
+            Gol
+          </Link>
+          <Link
+            href="/sondaggio"
+            className="whitespace-nowrap rounded px-2 py-1 font-medium text-[var(--accent)] hover:bg-white/5"
+          >
+            Sondaggio
+          </Link>
+          <Link
             href="/notizie"
             className="whitespace-nowrap rounded px-2 py-1 font-medium text-[var(--accent)] hover:bg-white/5"
           >
             News
           </Link>
-          {LEAGUES.slice(0, 5).map((league) => (
+          {LEAGUES.slice(0, 4).map((league) => (
             <Link
               key={league.slug}
               href={`/${league.slug}`}
@@ -68,6 +80,12 @@ export function Footer() {
         <nav className="flex flex-wrap gap-x-4 gap-y-2 text-xs">
           <Link href="/oggi" className="hover:text-[var(--ink)]">
             Partite di oggi
+          </Link>
+          <Link href="/gol" className="hover:text-[var(--ink)]">
+            Gol
+          </Link>
+          <Link href="/sondaggio" className="hover:text-[var(--ink)]">
+            Sondaggio
           </Link>
           <Link href="/notizie" className="hover:text-[var(--ink)]">
             Notizie
