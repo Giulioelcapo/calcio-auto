@@ -26,7 +26,9 @@ export default async function SondaggioPage() {
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
           Chi merita di più?
         </h1>
-        <p className="max-w-2xl text-sm text-[var(--muted)]">{poll.title}</p>
+        <p className="max-w-2xl text-sm text-[var(--muted)]">
+          {poll.title}. Vota e guarda subito i vincitori del sondaggio.
+        </p>
       </section>
 
       <AdSlot slot="top" />

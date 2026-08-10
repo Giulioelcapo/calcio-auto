@@ -32,7 +32,7 @@ export default async function HomePage() {
               Mini-gioco di oggi
             </p>
             <h2 className="text-xl font-semibold text-[var(--accent)]">
-              Chi merita di più?
+              Chi merita di più? · Vincitori live
             </h2>
           </div>
           <Link

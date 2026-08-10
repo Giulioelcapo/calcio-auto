@@ -4,6 +4,8 @@ import {
   buildPollState,
   castPollVote,
   cookieName,
+  getPollStorageMode,
+  isGlobalPollStorageReady,
   parseVotedMap,
 } from "@/lib/poll";
 import type { PollSide } from "@/lib/poll-types";
@@ -14,7 +16,12 @@ export async function GET() {
   const preview = await buildPollState({});
   const jar = await cookies();
   const votedMap = parseVotedMap(jar.get(cookieName(preview.dateISO))?.value);
-  return NextResponse.json(await buildPollState(votedMap));
+  const state = await buildPollState(votedMap);
+  return NextResponse.json({
+    ...state,
+    storage: getPollStorageMode(),
+    globalReady: isGlobalPollStorageReady(),
+  });
 }
 
 export async function POST(request: Request) {
@@ -38,10 +45,17 @@ export async function POST(request: Request) {
   const result = await castPollVote(matchId, side, votedMap);
 
   if (!result.ok) {
-    return NextResponse.json({ error: result.error }, { status: 400 });
+    return NextResponse.json(
+      { error: result.error },
+      { status: result.status ?? 400 },
+    );
   }
 
-  const response = NextResponse.json(result.state);
+  const response = NextResponse.json({
+    ...result.state,
+    storage: getPollStorageMode(),
+    globalReady: true,
+  });
   response.cookies.set(result.cookieKey, result.cookieValue, {
     httpOnly: true,
     sameSite: "lax",

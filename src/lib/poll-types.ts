@@ -25,4 +25,6 @@ export type PollState = {
   title: string;
   candidates: PollCandidate[];
   totalVotes: number;
+  storage?: "redis" | "local-file";
+  globalReady?: boolean;
 };
