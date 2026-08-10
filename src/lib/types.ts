@@ -69,6 +69,19 @@ export interface MatchItem {
   awayHalf: number | null;
 }
 
+export interface TodayMatch extends MatchItem {
+  leagueName: string;
+  leagueSlug: string;
+  leagueCode: string;
+}
+
+export interface TodaysMatchesResult {
+  dateISO: string;
+  dateLabel: string;
+  matches: TodayMatch[];
+  usingMock: boolean;
+}
+
 export interface TeamSummary {
   id: number;
   name: string;

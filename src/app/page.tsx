@@ -23,6 +23,22 @@ export default function HomePage() {
 
       <AdSlot slot="top" />
 
+      <section className="panel rounded-md p-4">
+        <h2 className="text-lg font-semibold text-[var(--accent)]">
+          Partite di oggi
+        </h2>
+        <p className="mt-1 text-sm text-[var(--muted)]">
+          Orari e risultati di tutte le partite in programma oggi, aggiornati in
+          automatico.
+        </p>
+        <Link
+          href="/oggi"
+          className="mt-3 inline-flex rounded bg-[var(--pitch)] px-3 py-1.5 text-sm hover:brightness-110"
+        >
+          Apri agenda di oggi
+        </Link>
+      </section>
+
       <section className="space-y-4">
         <h2 className="text-xl font-semibold text-[var(--accent)]">Campionati</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

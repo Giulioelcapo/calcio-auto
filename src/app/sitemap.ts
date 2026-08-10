@@ -9,6 +9,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
   const entries: MetadataRoute.Sitemap = [
     { url: base, lastModified: now, changeFrequency: "hourly", priority: 1 },
+    {
+      url: `${base}/oggi`,
+      lastModified: now,
+      changeFrequency: "hourly",
+      priority: 0.95,
+    },
   ];
 
   for (const path of LEGAL) {

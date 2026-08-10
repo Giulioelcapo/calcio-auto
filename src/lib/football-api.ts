@@ -4,7 +4,7 @@ import {
   buildTeamInjuryInsights,
   buildTeamInsights,
 } from "./insights";
-import { getLeagueBySlug, LEAGUES } from "./leagues";
+import { getLeagueByCode, getLeagueBySlug, LEAGUES } from "./leagues";
 import {
   buildMockMatches,
   buildMockScorers,
@@ -24,6 +24,8 @@ import type {
   StandingTable,
   TeamPageData,
   TeamSummary,
+  TodayMatch,
+  TodaysMatchesResult,
 } from "./types";
 
 const API_BASE = "https://api.football-data.org/v4";
@@ -85,6 +87,7 @@ interface ApiMatch {
   stage?: string | null;
   group?: string | null;
   venue?: string | null;
+  competition?: { id?: number; name?: string; code?: string };
   homeTeam: ApiTeam;
   awayTeam: ApiTeam;
   score?: {
@@ -617,4 +620,91 @@ export function listLeagues() {
 
 export function apiTokenConfigured() {
   return hasApiToken();
+}
+
+/** Data calendario Europa/Roma in YYYY-MM-DD */
+function calendarDateInRome(base = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Rome",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(base);
+}
+
+function shiftIsoDate(isoDate: string, days: number): string {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + days);
+  return dt.toISOString().slice(0, 10);
+}
+
+function romeDayKey(utcIso: string): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Rome",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(utcIso));
+}
+
+function formatItalianDate(isoDate: string): string {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("it-IT", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+/**
+ * Una sola chiamata API: tutte le partite di oggi (fuso Roma)
+ * sui 12 campionati free.
+ */
+export async function getTodaysMatches(): Promise<TodaysMatchesResult> {
+  const dateISO = calendarDateInRome();
+  const dateLabel = formatItalianDate(dateISO);
+  const empty = (usingMock: boolean): TodaysMatchesResult => ({
+    dateISO,
+    dateLabel,
+    matches: [],
+    usingMock,
+  });
+
+  if (!hasApiToken()) return empty(true);
+
+  const competitions = LEAGUES.map((l) => l.code).join(",");
+  // Include domani per partite dopo mezzanotte UTC ancora "oggi" a Roma
+  const dateTo = shiftIsoDate(dateISO, 1);
+  const res = await apiFetch<ApiMatchesResponse>(
+    `/matches?dateFrom=${dateISO}&dateTo=${dateTo}&competitions=${competitions}`,
+  );
+
+  if (!res.ok) return empty(true);
+
+  const mapped: TodayMatch[] = [];
+  for (const raw of res.data.matches ?? []) {
+    if (romeDayKey(raw.utcDate) !== dateISO) continue;
+    const code = (raw.competition?.code ?? "") as LeagueConfig["code"];
+    const league = getLeagueByCode(code);
+    if (!league) continue;
+    const [item] = mapMatches([raw]);
+    mapped.push({
+      ...item,
+      leagueName: league.name,
+      leagueSlug: league.slug,
+      leagueCode: league.code,
+    });
+  }
+
+  mapped.sort((a, b) => +new Date(a.utcDate) - +new Date(b.utcDate));
+
+  return {
+    dateISO,
+    dateLabel,
+    matches: mapped,
+    usingMock: false,
+  };
 }

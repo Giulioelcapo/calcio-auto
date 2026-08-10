@@ -14,7 +14,13 @@ export function Header() {
             FM Data Hub
           </span>
         </Link>
-        <nav className="flex max-w-[60%] gap-2 overflow-x-auto text-xs text-[var(--muted)] sm:max-w-none sm:text-sm">
+        <nav className="flex max-w-[70%] items-center gap-2 overflow-x-auto text-xs text-[var(--muted)] sm:max-w-none sm:text-sm">
+          <Link
+            href="/oggi"
+            className="whitespace-nowrap rounded px-2 py-1 font-medium text-[var(--accent)] hover:bg-white/5"
+          >
+            Oggi
+          </Link>
           {LEAGUES.slice(0, 6).map((league) => (
             <Link
               key={league.slug}
@@ -42,6 +48,9 @@ export function Footer() {
           </p>
         </div>
         <nav className="flex flex-wrap gap-x-4 gap-y-2 text-xs">
+          <Link href="/oggi" className="hover:text-[var(--ink)]">
+            Partite di oggi
+          </Link>
           <Link href="/chi-siamo" className="hover:text-[var(--ink)]">
             Chi siamo
           </Link>
