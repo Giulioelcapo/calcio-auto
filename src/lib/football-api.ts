@@ -235,14 +235,18 @@ async function apiFetch<T>(
   const token = (process.env["FOOTBALL_DATA_API_TOKEN"] ?? "").trim();
   if (!token) return { ok: false, status: 401 };
 
-  const response = await fetch(`${API_BASE}${path}`, {
-    headers: { "X-Auth-Token": token },
-    // Cache 15 min: free tier = 10 req/min, senza cache si va subito in 429
-    next: { revalidate: 900 },
-  });
+  try {
+    const response = await fetch(`${API_BASE}${path}`, {
+      headers: { "X-Auth-Token": token },
+      // Cache 15 min: free tier = 10 req/min, senza cache si va subito in 429
+      next: { revalidate: 900 },
+    });
 
-  if (!response.ok) return { ok: false, status: response.status };
-  return { ok: true, data: (await response.json()) as T };
+    if (!response.ok) return { ok: false, status: response.status };
+    return { ok: true, data: (await response.json()) as T };
+  } catch {
+    return { ok: false, status: 503 };
+  }
 }
 
 const BUNDLE_CACHE_TTL_MS = 10 * 60 * 1000;

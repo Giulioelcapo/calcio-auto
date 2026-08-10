@@ -31,11 +31,34 @@ export function isGlobalPollStorageReady(): boolean {
   return redisConfigured();
 }
 
+function redisUrl() {
+  let url = (process.env.UPSTASH_REDIS_REST_URL ?? "").trim();
+  // Valori incollati con virgolette o senza https
+  if (
+    (url.startsWith('"') && url.endsWith('"')) ||
+    (url.startsWith("'") && url.endsWith("'"))
+  ) {
+    url = url.slice(1, -1).trim();
+  }
+  if (url && !/^https?:\/\//i.test(url)) {
+    url = `https://${url}`;
+  }
+  return url;
+}
+
+function redisToken() {
+  let token = (process.env.UPSTASH_REDIS_REST_TOKEN ?? "").trim();
+  if (
+    (token.startsWith('"') && token.endsWith('"')) ||
+    (token.startsWith("'") && token.endsWith("'"))
+  ) {
+    token = token.slice(1, -1).trim();
+  }
+  return token;
+}
+
 function redisConfigured() {
-  return Boolean(
-    process.env.UPSTASH_REDIS_REST_URL?.trim() &&
-      process.env.UPSTASH_REDIS_REST_TOKEN?.trim(),
-  );
+  return Boolean(redisUrl() && redisToken());
 }
 
 function dayRedisKey(dateISO: string) {
@@ -47,8 +70,8 @@ function voteField(matchId: string, side: PollSide) {
 }
 
 async function redisCommand(command: (string | number)[]): Promise<unknown> {
-  const url = process.env.UPSTASH_REDIS_REST_URL?.trim();
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+  const url = redisUrl();
+  const token = redisToken();
   if (!url || !token) {
     throw new Error("Redis non configurato");
   }
