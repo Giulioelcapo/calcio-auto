@@ -13,16 +13,13 @@ export default async function HomePage() {
   return (
     <div className="space-y-8">
       <section className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.25em] text-[var(--muted)]">
-          Hub calcio automatico
-        </p>
-        <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
-          <span className="text-[var(--accent)]">CalcioAuto</span>
+        <h1 className="max-w-3xl text-3xl font-bold leading-tight tracking-tight sm:text-5xl">
+          <span className="text-[var(--accent)]">
+            12 LEAGUES. 1 GAME. INFINITE DATA.
+          </span>
         </h1>
-        <p className="max-w-2xl text-base text-[var(--muted)]">
-          Classifiche, calendari, risultati, notizie e insight automatici sui 12
-          campionati free. Stile Football Manager, mobile-first, pronto per
-          AdSense.
+        <p className="max-w-2xl text-sm text-[var(--muted)] sm:text-base">
+          Classifiche, calendari, risultati e notizie aggiornati in automatico.
         </p>
       </section>
 

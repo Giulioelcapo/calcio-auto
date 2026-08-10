@@ -25,12 +25,6 @@ export async function Header() {
         </Link>
         <nav className="flex max-w-[70%] items-center gap-2 overflow-x-auto text-xs text-[var(--muted)] sm:max-w-none sm:text-sm">
           <Link
-            href="/oggi"
-            className="whitespace-nowrap rounded px-2 py-1 font-medium text-[var(--accent)] hover:bg-white/5"
-          >
-            Oggi
-          </Link>
-          <Link
             href="/gol"
             className="whitespace-nowrap rounded px-2 py-1 font-medium text-[var(--accent)] hover:bg-white/5"
           >
