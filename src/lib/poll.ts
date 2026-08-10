@@ -146,7 +146,12 @@ async function getDayVotesFromFile(dateISO: string): Promise<DayVotes> {
 
 async function getDayVotes(dateISO: string): Promise<DayVotes> {
   if (redisConfigured()) {
-    return getDayVotesFromRedis(dateISO);
+    try {
+      return await getDayVotesFromRedis(dateISO);
+    } catch {
+      // Non bloccare build/runtime se Redis è momentaneamente irraggiungibile.
+      return {};
+    }
   }
   return getDayVotesFromFile(dateISO);
 }

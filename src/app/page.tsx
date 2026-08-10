@@ -5,6 +5,8 @@ import { listLeagues } from "@/lib/football-api";
 import { getFootballNews } from "@/lib/news";
 import { getServerPollState } from "@/lib/poll-server";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const leagues = listLeagues();
   const news = await getFootballNews(6);
