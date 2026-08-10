@@ -24,15 +24,9 @@ export function LeagueNav({ slug }: { slug: string }) {
   );
 }
 
-export function MockBanner({ usingMock }: { usingMock: boolean }) {
-  if (!usingMock) return null;
-  return (
-    <p className="rounded border border-[var(--warn)]/40 bg-[var(--warn)]/10 px-3 py-2 text-sm text-[var(--warn)]">
-      Modalità demo temporanea: API free limitata (max 10 richieste/minuto) oppure
-      token non valido. Aspetta 1 minuto e ricarica, oppure controlla{" "}
-      <code>FOOTBALL_DATA_API_TOKEN</code> su Vercel.
-    </p>
-  );
+export function MockBanner(_props: { usingMock: boolean }) {
+  // Nascosto in produzione: non attrattivo per i visitatori
+  return null;
 }
 
 export function ContentBlock({
