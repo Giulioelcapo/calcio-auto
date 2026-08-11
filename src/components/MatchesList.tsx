@@ -14,8 +14,11 @@ function formatWhen(iso: string) {
 export function MatchesList({ matches }: { matches: MatchItem[] }) {
   if (!matches.length) {
     return (
-      <div className="fm-panel p-4 text-sm text-[var(--muted)]">
-        Nessuna partita in questa selezione.
+      <div className="fm-panel space-y-1 p-4">
+        <p className="text-sm font-medium">Campionati non ancora iniziati</p>
+        <p className="text-sm text-[var(--muted)]">
+          Qui compariranno le partite appena parte la stagione.
+        </p>
       </div>
     );
   }

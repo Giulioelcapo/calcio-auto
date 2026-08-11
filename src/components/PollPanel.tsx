@@ -235,8 +235,7 @@ export function PollPanel({
   if (!state.candidates.length) {
     return (
       <p className="panel rounded-md p-4 text-sm text-[var(--muted)]">
-        Nessuna partita reale disponibile ora (API calcio o giornata vuota).
-        Controlla /oggi oppure riprova tra poco.
+        Nessuna partita disponibile. Riprova tra poco.
       </p>
     );
   }

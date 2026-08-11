@@ -70,7 +70,14 @@ export function StandingsTable({
 
 export function MatchesList({ matches }: { matches: MatchItem[] }) {
   if (!matches.length) {
-    return <p className="text-sm text-[var(--muted)]">Nessuna partita in questa selezione.</p>;
+    return (
+      <div className="panel space-y-1 rounded-md p-4">
+        <p className="text-sm font-medium">Campionati non ancora iniziati</p>
+        <p className="text-sm text-[var(--muted)]">
+          Qui compariranno le partite appena parte la stagione.
+        </p>
+      </div>
+    );
   }
   return (
     <ul className="space-y-2">

@@ -110,14 +110,17 @@ export default async function OggiPage() {
             ))}
           </div>
         ) : (
-          <p className="panel rounded-md p-4 text-sm text-[var(--muted)]">
-            Nessuna partita in programma oggi tra i campionati monitorati. In
-            pre-stagione è normale: torna dopo l’inizio dei campionati o apri i{" "}
-            <Link href="/" className="text-[var(--accent)] hover:underline">
-              calendari
-            </Link>
-            .
-          </p>
+          <div className="panel space-y-2 rounded-md p-4">
+            <p className="text-sm font-medium">Campionati non ancora iniziati</p>
+            <p className="text-sm text-[var(--muted)]">
+              Oggi non ci sono partite tra i campionati monitorati. Torna
+              all'inizio della stagione, oppure apri i{" "}
+              <Link href="/" className="text-[var(--accent)] hover:underline">
+                calendari
+              </Link>
+              .
+            </p>
+          </div>
         )}
       </section>
 

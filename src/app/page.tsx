@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AdSlot } from "@/components/AdSlot";
 import { PollPanel } from "@/components/PollPanel";
-import { listLeagues } from "@/lib/football-api";
+import { getTodaysMatches, listLeagues } from "@/lib/football-api";
 import { getFootballNews } from "@/lib/news";
 import { getServerPollState } from "@/lib/poll-server";
 
@@ -9,8 +9,12 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const leagues = listLeagues();
-  const news = await getFootballNews(6);
-  const poll = await getServerPollState();
+  const [news, poll, today] = await Promise.all([
+    getFootballNews(6),
+    getServerPollState(),
+    getTodaysMatches(),
+  ]);
+  const hasMatchesToday = today.matches.length > 0;
 
   return (
     <div className="space-y-8">
@@ -51,10 +55,16 @@ export default async function HomePage() {
         <h2 className="text-lg font-semibold text-[var(--accent)]">
           Partite di oggi
         </h2>
-        <p className="mt-1 text-sm text-[var(--muted)]">
-          Orari e risultati di tutte le partite in programma oggi, aggiornati in
-          automatico.
-        </p>
+        {hasMatchesToday ? (
+          <p className="mt-1 text-sm text-[var(--muted)]">
+            {today.dateLabel}: {today.matches.length} partite tra i campionati
+            monitorati, aggiornate in automatico.
+          </p>
+        ) : (
+          <p className="mt-1 text-sm text-[var(--muted)]">
+            Nessuna partita disponibile. Riprova tra poco.
+          </p>
+        )}
         <div className="mt-3 flex flex-wrap gap-2">
           <Link
             href="/oggi"

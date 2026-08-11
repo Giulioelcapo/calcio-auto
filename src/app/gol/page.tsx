@@ -77,13 +77,19 @@ export default async function GolPage() {
             ))}
           </ul>
         ) : (
-          <p className="panel rounded-md p-4 text-sm text-[var(--muted)]">
-            Nessun risultato ufficiale concluso oggi.{" "}
-            <Link href="/oggi" className="text-[var(--accent)] hover:underline">
-              Calendario di oggi
-            </Link>
-            .
-          </p>
+          <div className="panel space-y-2 rounded-md p-4">
+            <p className="text-sm font-medium">Campionati non ancora iniziati</p>
+            <p className="text-sm text-[var(--muted)]">
+              Nessun risultato ufficiale concluso oggi. Controlla il{" "}
+              <Link
+                href="/oggi"
+                className="text-[var(--accent)] hover:underline"
+              >
+                calendario di oggi
+              </Link>{" "}
+              oppure torna all’inizio della stagione.
+            </p>
+          </div>
         )}
       </section>
 
