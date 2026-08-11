@@ -33,6 +33,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "hourly",
       priority: 0.85,
     },
+    {
+      url: `${base}/osservatori`,
+      lastModified: now,
+      changeFrequency: "hourly",
+      priority: 0.85,
+    },
   ];
 
   for (const path of LEGAL) {

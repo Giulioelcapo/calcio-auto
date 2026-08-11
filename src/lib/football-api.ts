@@ -1,3 +1,4 @@
+import { assembleOsservatoriReport } from "./osservatori";
 import {
   buildInjuryInsights,
   buildLeagueInsights,
@@ -638,6 +639,8 @@ export type RankingsBoard = {
   total: StandingRow[];
   home: StandingRow[];
   away: StandingRow[];
+  /** Tabella completa (per algoritmi osservatori) */
+  allTotal: StandingRow[];
 };
 
 const RANKINGS_CACHE_TTL_MS = 10 * 60 * 1000;
@@ -657,8 +660,10 @@ async function fetchRankingsBoard(slug: string): Promise<RankingsBoard | null> {
     return cached.data;
   }
 
-  const pick = (tables: StandingTable[], type: string) =>
-    tables.find((t) => t.type === type)?.table.slice(0, 5) ?? [];
+  const pick = (tables: StandingTable[], type: string, limit = 5) =>
+    tables.find((t) => t.type === type)?.table.slice(0, limit) ?? [];
+  const full = (tables: StandingTable[], type: string) =>
+    tables.find((t) => t.type === type)?.table ?? [];
 
   if (!hasApiToken()) {
     const mock = buildMockStandingTables(league);
@@ -670,6 +675,9 @@ async function fetchRankingsBoard(slug: string): Promise<RankingsBoard | null> {
       total: pick(mock, "TOTAL"),
       home: pick(mock, "HOME"),
       away: pick(mock, "AWAY"),
+      allTotal: full(mock, "TOTAL").length
+        ? full(mock, "TOTAL")
+        : pick(mock, "TOTAL", 20),
     };
     return board;
   }
@@ -689,14 +697,21 @@ async function fetchRankingsBoard(slug: string): Promise<RankingsBoard | null> {
       total: pick(mock, "TOTAL"),
       home: pick(mock, "HOME"),
       away: pick(mock, "AWAY"),
+      allTotal: full(mock, "TOTAL").length
+        ? full(mock, "TOTAL")
+        : pick(mock, "TOTAL", 20),
     };
   }
 
   const tables = mapStandingTables(res.data.standings);
+  const allTotal =
+    full(tables, "TOTAL").length > 0
+      ? full(tables, "TOTAL")
+      : (tables[0]?.table ?? []);
   const total =
     pick(tables, "TOTAL").length > 0
       ? pick(tables, "TOTAL")
-      : (tables[0]?.table.slice(0, 5) ?? []);
+      : allTotal.slice(0, 5);
 
   const board: RankingsBoard = {
     slug: league.slug,
@@ -706,6 +721,7 @@ async function fetchRankingsBoard(slug: string): Promise<RankingsBoard | null> {
     total,
     home: pick(tables, "HOME"),
     away: pick(tables, "AWAY"),
+    allTotal,
   };
   rankingsCache.set(slug, { at: Date.now(), data: board });
   return board;
@@ -916,4 +932,106 @@ export async function getMultiLeagueScorers(
     });
   }
   return blocks;
+}
+
+const SCORERS_CACHE_TTL_MS = 10 * 60 * 1000;
+const scorersLiteCache = new Map<
+  string,
+  { at: number; scorers: ScorerRow[] }
+>();
+
+async function fetchScorersLite(slug: string): Promise<ScorerRow[]> {
+  const league = getLeagueBySlug(slug);
+  if (!league) return [];
+
+  const cached = scorersLiteCache.get(slug);
+  if (cached && Date.now() - cached.at < SCORERS_CACHE_TTL_MS) {
+    return cached.scorers;
+  }
+
+  if (!hasApiToken()) return [];
+
+  const res = await apiFetch<ApiScorersResponse>(
+    `/competitions/${league.code}/scorers${seasonQuery("limit=15")}`,
+  );
+  if (!res.ok || !res.data.scorers?.length) {
+    if (cached) return cached.scorers;
+    return [];
+  }
+
+  const scorers = res.data.scorers.map((row, index) => ({
+    rank: index + 1,
+    playerName: row.player.name,
+    teamName: row.team.name,
+    teamId: row.team.id,
+    teamCrest: row.team.crest ?? null,
+    goals: row.goals,
+    assists: row.assists ?? null,
+    penalties: row.penalties ?? null,
+    playedMatches: row.playedMatches ?? null,
+  }));
+  scorersLiteCache.set(slug, { at: Date.now(), scorers });
+  return scorers;
+}
+
+const OSSERVATORI_SLUGS = [
+  "serie-a",
+  "premier-league",
+  "la-liga",
+  "bundesliga",
+] as const;
+
+/** Feed Osservatori: ScoutScore giocatori + radar club. */
+export async function getOsservatoriReport() {
+  const boards = await Promise.all(
+    OSSERVATORI_SLUGS.map(async (slug) => {
+      const [board, scorers] = await Promise.all([
+        fetchRankingsBoard(slug),
+        fetchScorersLite(slug),
+      ]);
+      return { board, scorers };
+    }),
+  );
+
+  const playerInputs: Array<
+    ScorerRow & {
+      leagueName: string;
+      leagueSlug: string;
+      teamPosition: number | null;
+      teamPlayed: number;
+    }
+  > = [];
+  const clubInputs: Array<{
+    leagueName: string;
+    leagueSlug: string;
+    standings: StandingRow[];
+  }> = [];
+
+  for (const { board, scorers } of boards) {
+    if (!board) continue;
+    const table = board.allTotal.length ? board.allTotal : board.total;
+    const posByTeam = new Map(table.map((r) => [r.teamId, r] as const));
+
+    clubInputs.push({
+      leagueName: board.name,
+      leagueSlug: board.slug,
+      standings: table,
+    });
+
+    for (const s of scorers) {
+      const teamRow = posByTeam.get(s.teamId);
+      playerInputs.push({
+        ...s,
+        leagueName: board.name,
+        leagueSlug: board.slug,
+        teamPosition: teamRow?.position ?? null,
+        teamPlayed: teamRow?.playedGames ?? s.playedMatches ?? 1,
+      });
+    }
+  }
+
+  return assembleOsservatoriReport({
+    scorers: playerInputs,
+    clubs: clubInputs,
+  });
 }

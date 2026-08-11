@@ -2,9 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { AdSlot } from "@/components/AdSlot";
 import { PollPanel } from "@/components/PollPanel";
+import { OsservatoriSection } from "@/components/OsservatoriSection";
 import { RankingsSection } from "@/components/RankingsSection";
 import {
   getHomeRankings,
+  getOsservatoriReport,
   getTodaysMatches,
   listLeagues,
 } from "@/lib/football-api";
@@ -15,11 +17,12 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const leagues = listLeagues();
-  const [news, poll, today, rankings] = await Promise.all([
+  const [news, poll, today, rankings, osservatori] = await Promise.all([
     getFootballNews(8),
     getServerPollState(),
     getTodaysMatches(),
     getHomeRankings(),
+    getOsservatoriReport(),
   ]);
   const hasMatchesToday = today.matches.length > 0;
   const featured = news[0];
@@ -223,6 +226,8 @@ export default async function HomePage() {
       </section>
 
       <RankingsSection boards={rankings} />
+
+      <OsservatoriSection report={osservatori} compact />
 
       <section className="space-y-4">
         <div className="section-rule">
