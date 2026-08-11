@@ -2,19 +2,9 @@ import { adsenseClient } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
-/** ads.txt solo se AdSense è configurato via env. */
+/** ads.txt ufficiale: publisher ID senza prefisso ca- */
 export function GET() {
-  const client = adsenseClient();
-  if (!client) {
-    return new Response("# no adsense publisher configured\n", {
-      status: 200,
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "public, max-age=0, must-revalidate",
-      },
-    });
-  }
-
+  const client = adsenseClient() ?? "ca-pub-4342895251465402";
   const publisher = client.replace(/^ca-/, "");
   const body = `google.com, ${publisher}, DIRECT, f08c47fec0942fa0\n`;
 

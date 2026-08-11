@@ -17,7 +17,9 @@ export function siteUrl(): string {
 
 export function adsenseClient(): string | undefined {
   const id = process.env["NEXT_PUBLIC_ADSENSE_CLIENT_ID"]?.trim();
-  return id || undefined;
+  if (id) return id;
+  // Publisher per verifica sito (account Gmail attivo)
+  return "ca-pub-4342895251465402";
 }
 
 export function adsenseSlot(
