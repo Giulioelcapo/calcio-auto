@@ -150,36 +150,48 @@ a {
 .hero-pitch {
   position: relative;
   overflow: hidden;
+  min-height: clamp(280px, 42vw, 420px);
   border: 1px solid var(--line);
-  background:
-    linear-gradient(120deg, rgba(200, 248, 0, 0.12), transparent 42%),
-    linear-gradient(180deg, #121212 0%, #070707 100%);
+  background: #070707;
 }
 
-.hero-pitch::before {
-  content: "";
+.hero-pitch-media {
   position: absolute;
   inset: 0;
-  background-image:
-    repeating-linear-gradient(
-      90deg,
-      transparent 0,
-      transparent 47px,
-      rgba(200, 248, 0, 0.06) 47px,
-      rgba(200, 248, 0, 0.06) 48px
-    ),
-    repeating-linear-gradient(
-      0deg,
-      transparent 0,
-      transparent 47px,
-      rgba(255, 255, 255, 0.03) 47px,
-      rgba(255, 255, 255, 0.03) 48px
-    );
-  pointer-events: none;
 }
 
-.hero-pitch > * {
+.hero-pitch-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+}
+
+.hero-pitch-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.55) 48%, rgba(0, 0, 0, 0.35) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.75) 100%);
+}
+
+.hero-pitch-content {
   position: relative;
+  z-index: 1;
+}
+
+.media-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.media-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 @media (prefers-reduced-motion: reduce) {
