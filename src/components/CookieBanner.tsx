@@ -56,7 +56,7 @@ export function CookieBanner() {
           <button
             type="button"
             onClick={() => choose("accepted")}
-            className="rounded bg-[var(--accent)] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-[#102016]"
+            className="btn-accent rounded px-3 py-2 text-xs uppercase tracking-wide"
           >
             Accetta
           </button>

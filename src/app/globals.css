@@ -8,8 +8,9 @@
   --line: #242424;
   --ink: #f4f4f4;
   --muted: #9a9a9a;
-  --accent: #c8f800;
-  --accent-ink: #0a0a0a;
+  /* Lime più scuro: testo nero leggibile sui bottoni */
+  --accent: #a8d400;
+  --accent-ink: #050505;
   --warn: #f0b429;
 }
 
@@ -88,6 +89,22 @@ a {
 .masthead-bar {
   background: var(--accent);
   color: var(--accent-ink);
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.btn-accent:hover {
+  filter: brightness(1.05);
+}
+
+.rank-card {
+  background: #ffffff;
+  color: #111111;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
 .news-ticker-viewport {

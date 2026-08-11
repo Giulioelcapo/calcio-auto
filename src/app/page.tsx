@@ -2,7 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { AdSlot } from "@/components/AdSlot";
 import { PollPanel } from "@/components/PollPanel";
-import { getTodaysMatches, listLeagues } from "@/lib/football-api";
+import { RankingsSection } from "@/components/RankingsSection";
+import {
+  getHomeRankings,
+  getTodaysMatches,
+  listLeagues,
+} from "@/lib/football-api";
 import { getFootballNews } from "@/lib/news";
 import { getServerPollState } from "@/lib/poll-server";
 
@@ -10,10 +15,11 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const leagues = listLeagues();
-  const [news, poll, today] = await Promise.all([
+  const [news, poll, today, rankings] = await Promise.all([
     getFootballNews(8),
     getServerPollState(),
     getTodaysMatches(),
+    getHomeRankings(),
   ]);
   const hasMatchesToday = today.matches.length > 0;
   const featured = news[0];
@@ -45,7 +51,7 @@ export default async function HomePage() {
           <div className="mt-6 flex flex-wrap gap-2">
             <Link
               href="/notizie"
-              className="inline-flex bg-[var(--accent)] px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-[var(--accent-ink)] hover:brightness-110"
+              className="btn-accent inline-flex px-4 py-2 text-xs uppercase tracking-[0.14em]"
             >
               Ultime news
             </Link>
@@ -201,7 +207,7 @@ export default async function HomePage() {
             <div className="mt-4 flex flex-wrap gap-2">
               <Link
                 href="/oggi"
-                className="inline-flex bg-[var(--accent)] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent-ink)] hover:brightness-110"
+                className="btn-accent inline-flex px-3 py-1.5 text-xs uppercase tracking-[0.12em]"
               >
                 Apri agenda
               </Link>
@@ -215,6 +221,8 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <RankingsSection boards={rankings} />
 
       <section className="space-y-4">
         <div className="section-rule">
@@ -236,7 +244,7 @@ export default async function HomePage() {
               <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.08em]">
                 <Link
                   href={`/${league.slug}`}
-                  className="bg-[var(--accent)] px-2 py-1 text-[var(--accent-ink)] hover:brightness-110"
+                  className="btn-accent px-2 py-1 text-[11px] uppercase tracking-[0.08em]"
                 >
                   Hub
                 </Link>

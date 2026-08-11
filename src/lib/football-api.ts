@@ -630,6 +630,95 @@ export function listLeagues() {
   return LEAGUES;
 }
 
+export type RankingsBoard = {
+  slug: string;
+  name: string;
+  seasonLabel: string;
+  emblem: string | null;
+  total: StandingRow[];
+  home: StandingRow[];
+  away: StandingRow[];
+};
+
+const RANKINGS_CACHE_TTL_MS = 10 * 60 * 1000;
+const rankingsCache = new Map<
+  string,
+  { at: number; data: RankingsBoard }
+>();
+
+const HOME_RANKING_SLUGS = ["serie-a", "premier-league", "la-liga"] as const;
+
+async function fetchRankingsBoard(slug: string): Promise<RankingsBoard | null> {
+  const league = getLeagueBySlug(slug);
+  if (!league) return null;
+
+  const cached = rankingsCache.get(slug);
+  if (cached && Date.now() - cached.at < RANKINGS_CACHE_TTL_MS) {
+    return cached.data;
+  }
+
+  const pick = (tables: StandingTable[], type: string) =>
+    tables.find((t) => t.type === type)?.table.slice(0, 5) ?? [];
+
+  if (!hasApiToken()) {
+    const mock = buildMockStandingTables(league);
+    const board: RankingsBoard = {
+      slug: league.slug,
+      name: league.name,
+      seasonLabel: SEASON_LABEL,
+      emblem: league.emblem,
+      total: pick(mock, "TOTAL"),
+      home: pick(mock, "HOME"),
+      away: pick(mock, "AWAY"),
+    };
+    return board;
+  }
+
+  const res = await apiFetch<ApiStandingsResponse>(
+    `/competitions/${league.code}/standings${seasonQuery()}`,
+  );
+
+  if (!res.ok) {
+    if (cached) return cached.data;
+    const mock = buildMockStandingTables(league);
+    return {
+      slug: league.slug,
+      name: league.name,
+      seasonLabel: SEASON_LABEL,
+      emblem: league.emblem,
+      total: pick(mock, "TOTAL"),
+      home: pick(mock, "HOME"),
+      away: pick(mock, "AWAY"),
+    };
+  }
+
+  const tables = mapStandingTables(res.data.standings);
+  const total =
+    pick(tables, "TOTAL").length > 0
+      ? pick(tables, "TOTAL")
+      : (tables[0]?.table.slice(0, 5) ?? []);
+
+  const board: RankingsBoard = {
+    slug: league.slug,
+    name: league.name,
+    seasonLabel: seasonLabelFromApi(res.data.season),
+    emblem: res.data.competition?.emblem ?? league.emblem,
+    total,
+    home: pick(tables, "HOME"),
+    away: pick(tables, "AWAY"),
+  };
+  rankingsCache.set(slug, { at: Date.now(), data: board });
+  return board;
+}
+
+/** Top 3 classifiche home (1 sola chiamata standings per lega). */
+export async function getHomeRankings(): Promise<RankingsBoard[]> {
+  const boards = await Promise.all(
+    HOME_RANKING_SLUGS.map((slug) => fetchRankingsBoard(slug)),
+  );
+  return boards.filter(Boolean) as RankingsBoard[];
+}
+
 export function apiTokenConfigured() {
   return hasApiToken();
 }
