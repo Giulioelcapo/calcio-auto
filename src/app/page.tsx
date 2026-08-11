@@ -4,7 +4,6 @@ import { PollPanel } from "@/components/PollPanel";
 import { getTodaysMatches, listLeagues } from "@/lib/football-api";
 import { getFootballNews } from "@/lib/news";
 import { getServerPollState } from "@/lib/poll-server";
-import { SITE_NAME } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -23,13 +22,10 @@ export default async function HomePage() {
   return (
     <div className="space-y-10">
       <section className="hero-pitch rise-in rounded-sm px-5 py-8 sm:px-8 sm:py-10">
-        <h1 className="display-font max-w-3xl text-4xl font-bold uppercase leading-[0.95] tracking-tight text-[var(--accent)] sm:text-6xl">
-          {SITE_NAME}
-        </h1>
-        <p className="mt-4 max-w-xl text-base font-semibold text-[var(--ink)] sm:text-lg">
+        <h1 className="display-font max-w-3xl text-3xl font-bold uppercase leading-tight tracking-tight text-[var(--ink)] sm:text-5xl">
           12 campionati. News e dati, aggiornati da soli.
-        </p>
-        <p className="mt-2 max-w-xl text-sm text-[var(--muted)]">
+        </h1>
+        <p className="mt-3 max-w-xl text-sm text-[var(--muted)] sm:text-base">
           Partite di oggi, sondaggio community, classifiche e calendari in un
           solo hub.
         </p>
