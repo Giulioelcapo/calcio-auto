@@ -731,9 +731,8 @@ function isPollOpenStatus(status: string) {
 }
 
 /**
- * Pool sondaggio: SOLO partite reali API.
- * Priorità: oggi (Europa/Roma). Se oggi è vuoto → prossimi giorni reali.
- * Mai match inventati/demo.
+ * Pool sondaggio: SOLO partite reali API (1 sola chiamata).
+ * Priorità match di oggi; se non ce ne sono → prossimi 14 giorni.
  */
 export async function getPollMatchPool(): Promise<PollPool> {
   if (
@@ -744,23 +743,11 @@ export async function getPollMatchPool(): Promise<PollPool> {
     return pollPoolCache.data;
   }
 
-  const today = await getTodaysMatches();
-  if (today.matches.length >= 1) {
-    const open = today.matches.filter((m) => isPollOpenStatus(m.status));
-    const data: PollPool = {
-      ...today,
-      matches: open.length ? open : today.matches,
-      mode: "today",
-    };
-    if (data.matches.length) {
-      pollPoolCache = { at: Date.now(), data };
-    }
-    return data;
-  }
-
+  const dateISO = calendarDateInRome();
+  const dateLabel = formatItalianDate(dateISO);
   const empty: PollPool = {
-    dateISO: today.dateISO,
-    dateLabel: today.dateLabel,
+    dateISO,
+    dateLabel,
     matches: [],
     usingMock: false,
     mode: "today",
@@ -768,14 +755,13 @@ export async function getPollMatchPool(): Promise<PollPool> {
 
   if (!hasApiToken()) return empty;
 
-  const dateISO = today.dateISO;
   const dateTo = shiftIsoDate(dateISO, 14);
-  // Escludi WC/EC: meno rumore, URL più corto, meno 429
   const competitions = LEAGUES.filter(
     (l) => l.code !== "WC" && l.code !== "EC",
   )
     .map((l) => l.code)
     .join(",");
+
   const res = await apiFetch<ApiMatchesResponse>(
     `/matches?dateFrom=${dateISO}&dateTo=${dateTo}&competitions=${competitions}`,
   );
@@ -797,14 +783,16 @@ export async function getPollMatchPool(): Promise<PollPool> {
   }
   mapped.sort((a, b) => +new Date(a.utcDate) - +new Date(b.utcDate));
 
-  if (!mapped.length) return empty;
+  const todayMatches = mapped.filter((m) => romeDayKey(m.utcDate) === dateISO);
+  const chosen = todayMatches.length ? todayMatches : mapped;
+  if (!chosen.length) return empty;
 
   const data: PollPool = {
     dateISO,
-    dateLabel: today.dateLabel,
-    matches: mapped,
+    dateLabel,
+    matches: chosen,
     usingMock: false,
-    mode: "upcoming",
+    mode: todayMatches.length ? "today" : "upcoming",
   };
   pollPoolCache = { at: Date.now(), data };
   return data;

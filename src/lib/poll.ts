@@ -280,6 +280,8 @@ export async function buildPollState(
         : `Chi merita di più? · prossimi match · ${pool.dateLabel}`,
     candidates,
     totalVotes,
+    poolMode: pool.mode,
+    poolSize: pool.matches.length,
   };
 }
 

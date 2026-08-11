@@ -27,4 +27,7 @@ export type PollState = {
   totalVotes: number;
   storage?: "redis" | "local-file";
   globalReady?: boolean;
-};
+  /** Diagnostica: today | upcoming + quanti match API nel pool */
+  poolMode?: "today" | "upcoming";
+  poolSize?: number;
+}
