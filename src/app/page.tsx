@@ -47,6 +47,22 @@ export default async function HomePage() {
 
       <AdSlot slot="top" />
 
+      <section className="space-y-4">
+        <div className="section-rule">
+          <h2>Sondaggio</h2>
+          <Link
+            href="/sondaggio"
+            className="section-meta hover:text-[var(--accent)]"
+          >
+            Pagina completa
+          </Link>
+        </div>
+        <p className="text-sm text-[var(--muted)]">
+          Chi merita di più? Vota e guarda i vincitori live.
+        </p>
+        <PollPanel initial={poll} compact />
+      </section>
+
       <section className="space-y-4 rise-in-delay">
         <div className="section-rule">
           <h2>Ultimissime</h2>
@@ -161,22 +177,6 @@ export default async function HomePage() {
             </Link>
           </div>
         </div>
-      </section>
-
-      <section className="space-y-4">
-        <div className="section-rule">
-          <h2>Fan zone</h2>
-          <Link
-            href="/sondaggio"
-            className="section-meta hover:text-[var(--accent)]"
-          >
-            Pagina completa
-          </Link>
-        </div>
-        <p className="text-sm text-[var(--muted)]">
-          Chi merita di più? Mini-sondaggio community con vincitori live.
-        </p>
-        <PollPanel initial={poll} compact />
       </section>
 
       <section className="space-y-4">
