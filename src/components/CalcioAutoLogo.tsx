@@ -1,4 +1,4 @@
-/** Monogramma — logo Side Pitch Hub */
+/** Monogramma SP — logo Side Pitch Hub */
 export function CalcioAutoLogo({
   className = "h-8 w-8",
   title = "Side Pitch Hub",
@@ -7,10 +7,9 @@ export function CalcioAutoLogo({
   title?: string;
 }) {
   return (
-    // PNG generato monogramma CA (sfondo scuro + lime)
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src="/logo-ca.png"
+      src="/logo-sp.png"
       alt={title}
       width={72}
       height={72}
