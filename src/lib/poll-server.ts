@@ -9,9 +9,14 @@ import {
 
 export async function getServerPollState() {
   try {
-    const preview = await buildPollState({});
+    const dateISO = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Rome",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
     const jar = await cookies();
-    const votedMap = parseVotedMap(jar.get(cookieName(preview.dateISO))?.value);
+    const votedMap = parseVotedMap(jar.get(cookieName(dateISO))?.value);
     const state = await buildPollState(votedMap);
     return {
       ...state,

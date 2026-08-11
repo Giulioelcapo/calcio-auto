@@ -246,8 +246,8 @@ async function apiFetch<T>(
   try {
     const response = await fetch(`${API_BASE}${path}`, {
       headers: { "X-Auth-Token": token },
-      // Cache 15 min: free tier = 10 req/min, senza cache si va subito in 429
-      next: { revalidate: 900 },
+      // no-store: evita di cachare 403/429/risposte vuote per 15 min
+      cache: "no-store",
     });
 
     if (!response.ok) return { ok: false, status: response.status };
@@ -721,39 +721,61 @@ export async function getTodaysMatches(): Promise<TodaysMatchesResult> {
   };
 }
 
+type PollPool = TodaysMatchesResult & { mode: "today" | "upcoming" };
+
+const POLL_POOL_TTL_MS = 3 * 60 * 1000;
+let pollPoolCache: { at: number; data: PollPool } | null = null;
+
+function isPollOpenStatus(status: string) {
+  return ["TIMED", "SCHEDULED", "IN_PLAY", "PAUSED", "LIVE"].includes(status);
+}
+
 /**
  * Pool sondaggio: SOLO partite reali API.
  * Priorità: oggi (Europa/Roma). Se oggi è vuoto → prossimi giorni reali.
  * Mai match inventati/demo.
  */
-export async function getPollMatchPool(): Promise<
-  TodaysMatchesResult & { mode: "today" | "upcoming" }
-> {
+export async function getPollMatchPool(): Promise<PollPool> {
+  if (
+    pollPoolCache &&
+    Date.now() - pollPoolCache.at < POLL_POOL_TTL_MS &&
+    pollPoolCache.data.matches.length > 0
+  ) {
+    return pollPoolCache.data;
+  }
+
   const today = await getTodaysMatches();
   if (today.matches.length >= 1) {
-    const open = today.matches.filter(
-      (m) => m.status !== "FINISHED" && m.status !== "AWARDED",
-    );
-    return {
+    const open = today.matches.filter((m) => isPollOpenStatus(m.status));
+    const data: PollPool = {
       ...today,
       matches: open.length ? open : today.matches,
       mode: "today",
     };
+    if (data.matches.length) {
+      pollPoolCache = { at: Date.now(), data };
+    }
+    return data;
   }
 
-  const empty = {
+  const empty: PollPool = {
     dateISO: today.dateISO,
     dateLabel: today.dateLabel,
-    matches: [] as TodayMatch[],
-    usingMock: false as const,
-    mode: "today" as const,
+    matches: [],
+    usingMock: false,
+    mode: "today",
   };
 
   if (!hasApiToken()) return empty;
 
   const dateISO = today.dateISO;
   const dateTo = shiftIsoDate(dateISO, 14);
-  const competitions = LEAGUES.map((l) => l.code).join(",");
+  // Escludi WC/EC: meno rumore, URL più corto, meno 429
+  const competitions = LEAGUES.filter(
+    (l) => l.code !== "WC" && l.code !== "EC",
+  )
+    .map((l) => l.code)
+    .join(",");
   const res = await apiFetch<ApiMatchesResponse>(
     `/matches?dateFrom=${dateISO}&dateTo=${dateTo}&competitions=${competitions}`,
   );
@@ -764,15 +786,7 @@ export async function getPollMatchPool(): Promise<
     const code = (raw.competition?.code ?? "") as LeagueConfig["code"];
     const league = getLeagueByCode(code);
     if (!league) continue;
-    const status = String(raw.status ?? "");
-    // Solo partite reali ancora da giocare / live / finite di recente nel range
-    if (
-      !["TIMED", "SCHEDULED", "IN_PLAY", "PAUSED", "LIVE", "FINISHED"].includes(
-        status,
-      )
-    ) {
-      continue;
-    }
+    if (!isPollOpenStatus(String(raw.status ?? ""))) continue;
     const [item] = mapMatches([raw]);
     mapped.push({
       ...item,
@@ -785,13 +799,15 @@ export async function getPollMatchPool(): Promise<
 
   if (!mapped.length) return empty;
 
-  return {
+  const data: PollPool = {
     dateISO,
     dateLabel: today.dateLabel,
     matches: mapped,
     usingMock: false,
     mode: "upcoming",
   };
+  pollPoolCache = { at: Date.now(), data };
+  return data;
 }
 
 export type LeagueScorersBlock = {
