@@ -9,49 +9,63 @@ export async function Header() {
   const news = await getFootballNews(8);
 
   return (
-    <header className="border-b border-[var(--line)] bg-black/30 backdrop-blur">
-      <NewsTicker items={news} />
+    <header className="border-b border-[var(--line)] bg-black">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-        <Link href="/" className="flex items-center gap-2.5">
-          <CalcioAutoLogo className="h-9 w-9 shrink-0" />
-          <span className="flex flex-col leading-none">
-            <span className="text-lg font-bold tracking-tight text-[var(--accent)]">
-              {SITE_NAME}
-            </span>
-            <span className="mt-1 hidden text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] sm:inline">
-              FM Data Hub
-            </span>
+        <Link href="/" className="flex items-center gap-3">
+          <CalcioAutoLogo className="h-10 w-10 shrink-0" />
+          <span className="display-font text-2xl font-bold uppercase tracking-[0.06em] text-[var(--accent)] sm:text-3xl">
+            {SITE_NAME}
           </span>
         </Link>
-        <nav className="flex max-w-[70%] items-center gap-2 overflow-x-auto text-xs text-[var(--muted)] sm:max-w-none sm:text-sm">
+        <nav className="flex max-w-[58%] items-center gap-1 overflow-x-auto text-[11px] uppercase tracking-[0.12em] text-[var(--muted)] sm:max-w-none sm:gap-2 sm:text-xs">
+          <Link
+            href="/notizie"
+            className="whitespace-nowrap px-2 py-1 font-semibold text-[var(--accent)] hover:bg-white/5"
+          >
+            News
+          </Link>
+          <Link
+            href="/oggi"
+            className="whitespace-nowrap px-2 py-1 hover:bg-white/5 hover:text-[var(--ink)]"
+          >
+            Oggi
+          </Link>
           <Link
             href="/gol"
-            className="whitespace-nowrap rounded px-2 py-1 font-medium text-[var(--accent)] hover:bg-white/5"
+            className="whitespace-nowrap px-2 py-1 hover:bg-white/5 hover:text-[var(--ink)]"
           >
             Gol
           </Link>
           <Link
             href="/sondaggio"
-            className="whitespace-nowrap rounded px-2 py-1 font-medium text-[var(--accent)] hover:bg-white/5"
+            className="whitespace-nowrap px-2 py-1 hover:bg-white/5 hover:text-[var(--ink)]"
           >
             Sondaggio
           </Link>
-          <Link
-            href="/notizie"
-            className="whitespace-nowrap rounded px-2 py-1 font-medium text-[var(--accent)] hover:bg-white/5"
-          >
-            News
-          </Link>
-          {LEAGUES.slice(0, 4).map((league) => (
+          {LEAGUES.slice(0, 3).map((league) => (
             <Link
               key={league.slug}
               href={`/${league.slug}`}
-              className="whitespace-nowrap rounded px-2 py-1 hover:bg-white/5 hover:text-[var(--ink)]"
+              className="hidden whitespace-nowrap px-2 py-1 hover:bg-white/5 hover:text-[var(--ink)] md:inline"
             >
               {league.shortName}
             </Link>
           ))}
         </nav>
+      </div>
+      <div className="masthead-bar">
+        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2">
+          <Link
+            href="/notizie"
+            className="display-font shrink-0 text-sm font-bold uppercase italic tracking-wide"
+          >
+            Leggi
+          </Link>
+          <div className="hidden h-4 w-px bg-black/25 sm:block" />
+          <div className="min-w-0 flex-1">
+            <NewsTicker items={news} />
+          </div>
+        </div>
       </div>
     </header>
   );
@@ -59,41 +73,43 @@ export async function Header() {
 
 export function Footer() {
   return (
-    <footer className="mt-auto border-t border-[var(--line)] py-8 text-sm text-[var(--muted)]">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 sm:flex-row sm:items-start sm:justify-between">
+    <footer className="mt-auto border-t border-[var(--line)] bg-black py-10 text-sm text-[var(--muted)]">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
-          <CalcioAutoLogo className="h-10 w-10 shrink-0" />
+          <CalcioAutoLogo className="h-11 w-11 shrink-0" />
           <div className="space-y-1">
-            <p className="font-semibold text-[var(--accent)]">{SITE_NAME}</p>
-            <p className="text-xs">
-              Classifiche e calendari aggiornati in automatico · Dati
-              football-data.org
+            <p className="display-font text-lg font-bold uppercase tracking-wide text-[var(--accent)]">
+              {SITE_NAME}
+            </p>
+            <p className="max-w-sm text-xs leading-relaxed">
+              Classifiche, calendari, risultati e notizie aggiornati in
+              automatico · Dati football-data.org
             </p>
           </div>
         </div>
-        <nav className="flex flex-wrap gap-x-4 gap-y-2 text-xs">
-          <Link href="/oggi" className="hover:text-[var(--ink)]">
+        <nav className="flex flex-wrap gap-x-4 gap-y-2 text-xs uppercase tracking-[0.12em]">
+          <Link href="/oggi" className="hover:text-[var(--accent)]">
             Partite di oggi
           </Link>
-          <Link href="/gol" className="hover:text-[var(--ink)]">
+          <Link href="/gol" className="hover:text-[var(--accent)]">
             Gol
           </Link>
-          <Link href="/sondaggio" className="hover:text-[var(--ink)]">
+          <Link href="/sondaggio" className="hover:text-[var(--accent)]">
             Sondaggio
           </Link>
-          <Link href="/notizie" className="hover:text-[var(--ink)]">
+          <Link href="/notizie" className="hover:text-[var(--accent)]">
             Notizie
           </Link>
-          <Link href="/chi-siamo" className="hover:text-[var(--ink)]">
+          <Link href="/chi-siamo" className="hover:text-[var(--accent)]">
             Chi siamo
           </Link>
-          <Link href="/contatti" className="hover:text-[var(--ink)]">
+          <Link href="/contatti" className="hover:text-[var(--accent)]">
             Contatti
           </Link>
-          <Link href="/privacy" className="hover:text-[var(--ink)]">
+          <Link href="/privacy" className="hover:text-[var(--accent)]">
             Privacy
           </Link>
-          <Link href="/cookie" className="hover:text-[var(--ink)]">
+          <Link href="/cookie" className="hover:text-[var(--accent)]">
             Cookie
           </Link>
         </nav>

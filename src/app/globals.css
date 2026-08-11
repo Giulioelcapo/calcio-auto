@@ -1,21 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --pitch: #1f6b3a;
-  --pitch-dim: #163f26;
-  --board: #0f1412;
-  --panel: #171e1a;
-  --line: #2a3a30;
-  --ink: #e8f0ea;
-  --muted: #9bb0a2;
-  --accent: #c8f560;
+  --pitch: #1a5c32;
+  --pitch-dim: #0f2e1a;
+  --board: #050505;
+  --panel: #111111;
+  --line: #242424;
+  --ink: #f4f4f4;
+  --muted: #9a9a9a;
+  --accent: #c8f800;
+  --accent-ink: #0a0a0a;
   --warn: #f0b429;
 }
 
 @theme inline {
   --color-background: var(--board);
   --color-foreground: var(--ink);
-  --font-sans: var(--font-display);
+  --font-sans: var(--font-body);
   --font-mono: var(--font-data);
 }
 
@@ -27,10 +28,11 @@ body {
   margin: 0;
   min-height: 100vh;
   color: var(--ink);
-  background:
-    radial-gradient(ellipse at top, rgba(31, 107, 58, 0.28), transparent 55%),
-    linear-gradient(180deg, #101612 0%, var(--board) 40%, #0b100d 100%);
-  font-family: var(--font-display), system-ui, sans-serif;
+  background-color: var(--board);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(200, 248, 0, 0.08), transparent 55%),
+    linear-gradient(180deg, #0a0a0a 0%, var(--board) 45%, #000 100%);
+  font-family: var(--font-body), system-ui, sans-serif;
 }
 
 a {
@@ -38,8 +40,9 @@ a {
   text-decoration: none;
 }
 
-.panel {
-  background: color-mix(in oklab, var(--panel) 92%, black);
+.panel,
+.fm-panel {
+  background: color-mix(in oklab, var(--panel) 96%, black);
   border: 1px solid var(--line);
 }
 
@@ -47,9 +50,44 @@ a {
   font-family: var(--font-data), ui-monospace, monospace;
 }
 
+.display-font {
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+
 .table-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+.section-rule {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 0.4rem;
+}
+
+.section-rule h2 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: clamp(1.35rem, 3vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin: 0;
+}
+
+.section-rule .section-meta {
+  margin-left: auto;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+
+.masthead-bar {
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
 .news-ticker-viewport {
@@ -57,8 +95,8 @@ a {
   mask-image: linear-gradient(
     90deg,
     transparent,
-    #000 4%,
-    #000 96%,
+    #000 3%,
+    #000 97%,
     transparent
   );
 }
@@ -73,11 +111,12 @@ a {
 .news-ticker-item {
   white-space: nowrap;
   font-size: 0.8rem;
-  color: var(--ink);
+  color: var(--accent-ink);
+  font-weight: 600;
 }
 
 .news-ticker-item:hover {
-  color: var(--accent);
+  opacity: 0.75;
 }
 
 @keyframes news-ticker {
@@ -89,8 +128,64 @@ a {
   }
 }
 
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rise-in {
+  animation: rise-in 0.55s ease-out both;
+}
+
+.rise-in-delay {
+  animation: rise-in 0.55s ease-out 0.12s both;
+}
+
+.hero-pitch {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(120deg, rgba(200, 248, 0, 0.12), transparent 42%),
+    linear-gradient(180deg, #121212 0%, #070707 100%);
+}
+
+.hero-pitch::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 47px,
+      rgba(200, 248, 0, 0.06) 47px,
+      rgba(200, 248, 0, 0.06) 48px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 47px,
+      rgba(255, 255, 255, 0.03) 47px,
+      rgba(255, 255, 255, 0.03) 48px
+    );
+  pointer-events: none;
+}
+
+.hero-pitch > * {
+  position: relative;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .news-ticker-track {
+  .news-ticker-track,
+  .rise-in,
+  .rise-in-delay {
     animation: none;
   }
 }

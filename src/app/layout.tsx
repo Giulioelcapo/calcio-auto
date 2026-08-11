@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Barlow_Condensed, IBM_Plex_Sans } from "next/font/google";
+import { Barlow_Condensed, Oswald, Source_Sans_3 } from "next/font/google";
 import { CookieBanner } from "@/components/CookieBanner";
 import { Footer, Header } from "@/components/Header";
 import {
@@ -11,10 +11,16 @@ import {
 } from "@/lib/site";
 import "./globals.css";
 
-const display = IBM_Plex_Sans({
+const display = Oswald({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["500", "600", "700"],
+});
+
+const body = Source_Sans_3({
+  variable: "--font-body",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
 });
 
 const data = Barlow_Condensed({
@@ -59,7 +65,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="it" className={`${display.variable} ${data.variable} h-full`}>
+    <html
+      lang="it"
+      className={`${display.variable} ${body.variable} ${data.variable} h-full`}
+    >
       <head>
         {adsense ? (
           <script
@@ -71,7 +80,7 @@ export default function RootLayout({
       </head>
       <body className="flex min-h-full flex-col antialiased">
         <Header />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:py-8">
           {children}
         </main>
         <Footer />
