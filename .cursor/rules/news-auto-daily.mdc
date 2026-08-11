@@ -5,8 +5,8 @@ alwaysApply: true
 
 # News automatiche (giorno corrente)
 
-- Le news free (Google News RSS / ticker / `/notizie` / home) devono **sempre aggiornarsi automaticamente**.
-- Il giorno del sito (Europa/Roma) deve allinearsi al giorno delle news: es. **11 agosto → news dell’11 agosto**, e così via ogni giorno.
-- Non usare cache lunga sulle fetch news (`cache: "no-store"` o revalidate molto breve).
-- Preferisci feed con filtro temporale (es. `when:1d`) e ordina per data, privilegiando le news di oggi.
-- Non sostituire le news live con contenuti statici o demo inventati.
+- Le news free devono **sempre aggiornarsi automaticamente** al giorno corrente (Europa/Roma).
+- **Scarta le news dei giorni precedenti**: niente accumulo in memoria/liste (solo oggi).
+- Limita il numero di item (ticker ~8, pagine ~18 max).
+- Fetch con `cache: "no-store"` e feed `when:1d`.
+- Non salvare archivi news su file/DB.

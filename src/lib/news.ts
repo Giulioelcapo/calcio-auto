@@ -64,7 +64,7 @@ function itemDayKey(publishedAt: string | null): string | null {
   return romeDayKey(new Date(t));
 }
 
-/** Feed free Google News: when:1d = ultime ~24h, sempre del giorno corrente. */
+/** Solo ultime ~24h: le più vecchie non vengono tenute. */
 const FEEDS = [
   {
     id: "calcio",
@@ -76,6 +76,8 @@ const FEEDS = [
   },
 ] as const;
 
+const MAX_NEWS = 20;
+
 async function fetchFeed(url: string): Promise<NewsItem[]> {
   try {
     const res = await fetch(url, {
@@ -83,7 +85,6 @@ async function fetchFeed(url: string): Promise<NewsItem[]> {
         "User-Agent": "CalcioAutoBot/1.0 (+https://calcio-auto.vercel.app)",
         Accept: "application/rss+xml, application/xml, text/xml",
       },
-      // Sempre fresco: 11 agosto → news dell'11, ecc.
       cache: "no-store",
     });
     if (!res.ok) return [];
@@ -94,33 +95,38 @@ async function fetchFeed(url: string): Promise<NewsItem[]> {
   }
 }
 
-/** Titoli notizie calcio da Google News RSS (free). Solo headline + link fonte. */
-export async function getFootballNews(limit = 24): Promise<NewsItem[]> {
+/**
+ * News calcio free del giorno (Europa/Roma).
+ * Le notizie dei giorni precedenti vengono scartate (niente accumulo).
+ */
+export async function getFootballNews(limit = 16): Promise<NewsItem[]> {
+  const cap = Math.min(Math.max(limit, 1), MAX_NEWS);
   const batches = await Promise.all(FEEDS.map((f) => fetchFeed(f.url)));
   const seen = new Set<string>();
-  const merged: NewsItem[] = [];
+  const today = romeDayKey();
+  const ofToday: NewsItem[] = [];
 
   for (const batch of batches) {
     for (const item of batch) {
       const key = item.title.toLowerCase();
       if (seen.has(key)) continue;
+
+      const day = itemDayKey(item.publishedAt);
+      // Tieni solo oggi. Senza data (RSS) ok se il feed è already when:1d.
+      if (day !== null && day !== today) continue;
+
       seen.add(key);
-      merged.push(item);
+      ofToday.push(item);
+      if (ofToday.length >= cap) break;
     }
+    if (ofToday.length >= cap) break;
   }
 
-  const today = romeDayKey();
-  merged.sort((a, b) => {
-    const aToday = itemDayKey(a.publishedAt) === today ? 1 : 0;
-    const bToday = itemDayKey(b.publishedAt) === today ? 1 : 0;
-    if (aToday !== bToday) return bToday - aToday;
+  ofToday.sort((a, b) => {
     const at = a.publishedAt ? Date.parse(a.publishedAt) : 0;
     const bt = b.publishedAt ? Date.parse(b.publishedAt) : 0;
     return bt - at;
   });
 
-  // Preferisci news di oggi; se poche, completa con le più recenti when:1d
-  const ofToday = merged.filter((i) => itemDayKey(i.publishedAt) === today);
-  const rest = merged.filter((i) => itemDayKey(i.publishedAt) !== today);
-  return [...ofToday, ...rest].slice(0, limit);
+  return ofToday.slice(0, cap);
 }

@@ -26,7 +26,7 @@ function formatWhen(value: string | null) {
 }
 
 export default async function NotiziePage() {
-  const news = await getFootballNews(30);
+  const news = await getFootballNews(18);
 
   return (
     <div className="space-y-6">

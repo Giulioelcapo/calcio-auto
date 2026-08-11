@@ -6,7 +6,7 @@ import { getFootballNews } from "@/lib/news";
 import { SITE_NAME } from "@/lib/site";
 
 export async function Header() {
-  const news = await getFootballNews(12);
+  const news = await getFootballNews(8);
 
   return (
     <header className="border-b border-[var(--line)] bg-black/30 backdrop-blur">
