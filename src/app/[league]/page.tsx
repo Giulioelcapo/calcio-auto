@@ -5,8 +5,11 @@ import { AdSlot } from "@/components/AdSlot";
 import { InsightCards } from "@/components/DataViews";
 import { ContentBlock, LeagueNav, MockBanner } from "@/components/LeagueNav";
 import { leagueHubIntro } from "@/lib/content-templates";
-import { getCompetitionBundle } from "@/lib/football-api";
+import { getCompetitionBundle, getLeagueFreeBundle } from "@/lib/football-api";
 import { getAllLeagueSlugs } from "@/lib/leagues";
+import { getLeagueNews } from "@/lib/news";
+import { Crest } from "@/components/Crest";
+import { teamPathSlug } from "@/lib/slug";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -42,6 +45,13 @@ export default async function LeagueHubPage({ params }: Props) {
   const data = await getCompetitionBundle(slug);
   if (!data) notFound();
 
+  const [news, free] = await Promise.all([
+    getLeagueNews(slug, 5),
+    getLeagueFreeBundle(slug),
+  ]);
+  const hotStreaks = (free?.streaks ?? []).filter((s) => s.type === "W").slice(0, 3);
+  const next = free?.nextMatchday;
+
   return (
     <div className="space-y-6">
       <MockBanner usingMock={data.usingMock} />
@@ -50,10 +60,71 @@ export default async function LeagueHubPage({ params }: Props) {
           {data.league.country} · {data.seasonLabel}
         </p>
         <h1 className="text-3xl font-bold">{data.league.name}</h1>
+        {next ? (
+          <p className="text-sm text-[var(--muted)]">
+            Giornata {next.matchday} · {next.matchCount} gare
+            {next.hoursToFirst != null ? ` · tra ${next.hoursToFirst}h` : ""}
+          </p>
+        ) : null}
       </div>
       <LeagueNav slug={slug} />
       <AdSlot slot="top" />
       <ContentBlock>{leagueHubIntro(data)}</ContentBlock>
+
+      {hotStreaks.length ? (
+        <section className="panel space-y-2 p-4">
+          <div className="flex items-center justify-between">
+            <h2 className="display-font text-sm font-bold uppercase tracking-wide">
+              Streak W
+            </h2>
+            <Link
+              href={`/share/classifica/${slug}`}
+              className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)] hover:text-[var(--accent)]"
+            >
+              Card
+            </Link>
+          </div>
+          <ul className="space-y-1">
+            {hotStreaks.map((s) => (
+              <li key={s.teamId} className="flex items-center justify-between text-sm">
+                <Link
+                  href={`/${slug}/squadra/${teamPathSlug(s.teamName, s.teamId)}`}
+                  className="flex items-center gap-2 hover:text-[var(--accent)]"
+                >
+                  <Crest src={s.crest} alt={s.teamName} size={18} />
+                  {s.teamName}
+                </Link>
+                <span className="data-font text-[var(--accent)]">
+                  W×{s.length}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {news.length ? (
+        <section className="space-y-2">
+          <h2 className="display-font text-sm font-bold uppercase tracking-wide text-[var(--muted)]">
+            News
+          </h2>
+          <ul className="panel divide-y divide-[var(--line)]">
+            {news.map((item) => (
+              <li key={item.id}>
+                <a
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block px-4 py-3 text-sm hover:bg-white/[0.03]"
+                >
+                  {item.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <InsightCards cards={data.insights.slice(0, 4)} />
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {LINKS.map(([seg, label]) => (

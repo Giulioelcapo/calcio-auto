@@ -2,9 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { AdSlot } from "@/components/AdSlot";
 import { PollPanel } from "@/components/PollPanel";
+import { FreeDeskSection } from "@/components/FreeDeskSection";
 import { OsservatoriSection } from "@/components/OsservatoriSection";
 import { RankingsSection } from "@/components/RankingsSection";
 import {
+  getFreeDeskReport,
   getHomeRankings,
   getOsservatoriReport,
   getTodaysMatches,
@@ -17,13 +19,15 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const leagues = listLeagues();
-  const [news, poll, today, rankings, osservatori] = await Promise.all([
-    getFootballNews(8),
-    getServerPollState(),
-    getTodaysMatches(),
-    getHomeRankings(),
-    getOsservatoriReport(),
-  ]);
+  const [news, poll, today, rankings, osservatori, freeDesk] =
+    await Promise.all([
+      getFootballNews(8),
+      getServerPollState(),
+      getTodaysMatches(),
+      getHomeRankings(),
+      getOsservatoriReport(),
+      getFreeDeskReport(),
+    ]);
   const hasMatchesToday = today.matches.length > 0;
   const featured = news[0];
   const sideNews = news.slice(1, 4);
@@ -226,6 +230,8 @@ export default async function HomePage() {
       </section>
 
       <RankingsSection boards={rankings} />
+
+      <FreeDeskSection report={freeDesk} compact />
 
       <OsservatoriSection report={osservatori} compact />
 

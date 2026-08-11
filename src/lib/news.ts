@@ -130,3 +130,42 @@ export async function getFootballNews(limit = 16): Promise<NewsItem[]> {
 
   return ofToday.slice(0, cap);
 }
+
+const LEAGUE_FEED_QUERY: Record<string, string> = {
+  "serie-a": "Serie%20A",
+  "premier-league": "Premier%20League",
+  "la-liga": "La%20Liga",
+  bundesliga: "Bundesliga",
+  "ligue-1": "Ligue%201",
+  championship: "Championship%20EFL",
+  eredivisie: "Eredivisie",
+  "primeira-liga": "Primeira%20Liga",
+  brasileirao: "Brasileir%C3%A3o",
+};
+
+/** News del giorno filtrate per campionato (RSS free). */
+export async function getLeagueNews(
+  leagueSlug: string,
+  limit = 8,
+): Promise<NewsItem[]> {
+  const q = LEAGUE_FEED_QUERY[leagueSlug];
+  if (!q) return getFootballNews(limit);
+
+  const url =
+    `https://news.google.com/rss/search?q=${q}%20when%3A1d&hl=it&gl=IT&ceid=IT:it`;
+  const batch = await fetchFeed(url);
+  const today = romeDayKey();
+  const seen = new Set<string>();
+  const out: NewsItem[] = [];
+
+  for (const item of batch) {
+    const key = item.title.toLowerCase();
+    if (seen.has(key)) continue;
+    const day = itemDayKey(item.publishedAt);
+    if (day !== null && day !== today) continue;
+    seen.add(key);
+    out.push(item);
+    if (out.length >= limit) break;
+  }
+  return out;
+}

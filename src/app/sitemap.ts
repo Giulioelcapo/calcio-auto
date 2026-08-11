@@ -39,7 +39,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "hourly",
       priority: 0.85,
     },
+    {
+      url: `${base}/analisi`,
+      lastModified: now,
+      changeFrequency: "hourly",
+      priority: 0.85,
+    },
+    {
+      url: `${base}/share/oggi`,
+      lastModified: now,
+      changeFrequency: "hourly",
+      priority: 0.7,
+    },
   ];
+
+  for (const league of LEAGUES.slice(0, 12)) {
+    entries.push({
+      url: `${base}/share/classifica/${league.slug}`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.6,
+    });
+  }
 
   for (const path of LEGAL) {
     entries.push({

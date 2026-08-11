@@ -735,6 +735,122 @@ export async function getHomeRankings(): Promise<RankingsBoard[]> {
   return boards.filter(Boolean) as RankingsBoard[];
 }
 
+const MATCHES_CACHE_TTL_MS = 10 * 60 * 1000;
+const matchesLiteCache = new Map<
+  string,
+  { at: number; matches: MatchItem[] }
+>();
+
+async function fetchMatchesLite(slug: string): Promise<MatchItem[]> {
+  const league = getLeagueBySlug(slug);
+  if (!league) return [];
+  const cached = matchesLiteCache.get(slug);
+  if (cached && Date.now() - cached.at < MATCHES_CACHE_TTL_MS) {
+    return cached.matches;
+  }
+  if (!hasApiToken()) {
+    return sanitizeMatches(buildMockMatches(league));
+  }
+  const res = await apiFetch<ApiMatchesResponse>(
+    `/competitions/${league.code}/matches${seasonQuery()}`,
+  );
+  if (!res.ok) {
+    if (cached) return cached.matches;
+    return [];
+  }
+  const matches = sanitizeMatches(mapMatches(res.data.matches ?? []));
+  matchesLiteCache.set(slug, { at: Date.now(), matches });
+  return matches;
+}
+
+export type FreeDeskLeagueBlock = {
+  slug: string;
+  name: string;
+  streaks: ReturnType<typeof import("./free-stats").buildFormStreaks>;
+  hardFixtures: ReturnType<
+    typeof import("./free-stats").buildFixtureDifficulties
+  >;
+  nextMatchday: ReturnType<typeof import("./free-stats").nextMatchdayInfo>;
+};
+
+export type FreeDeskReport = {
+  leagues: FreeDeskLeagueBlock[];
+  meteo: Awaited<ReturnType<typeof import("./meteo").getMeteoBundle>>;
+  todayCount: number;
+  dateLabel: string;
+};
+
+/** Desk free: streak, difficoltà, prossima giornata, meteo. */
+export async function getFreeDeskReport(): Promise<FreeDeskReport> {
+  const {
+    buildFormStreaks,
+    buildFixtureDifficulties,
+    nextMatchdayInfo,
+  } = await import("./free-stats");
+  const { getMeteoBundle } = await import("./meteo");
+
+  const [today, boards] = await Promise.all([
+    getTodaysMatches(),
+    getHomeRankings(),
+  ]);
+
+  const leagues: FreeDeskLeagueBlock[] = await Promise.all(
+    boards.map(async (board) => {
+      const matches = await fetchMatchesLite(board.slug);
+      const upcoming = matches
+        .filter((m) => m.status !== "FINISHED" && m.status !== "AWARDED")
+        .sort((a, b) => a.utcDate.localeCompare(b.utcDate));
+      const table = board.allTotal.length ? board.allTotal : board.total;
+      return {
+        slug: board.slug,
+        name: board.name,
+        streaks: buildFormStreaks(table, { minLength: 2, limit: 6 }),
+        hardFixtures: buildFixtureDifficulties(upcoming, table, { limit: 5 }),
+        nextMatchday: nextMatchdayInfo(matches),
+      };
+    }),
+  );
+
+  const meteo = await getMeteoBundle(["IT", "GB", "ES", "DE"]);
+
+  return {
+    leagues,
+    meteo,
+    todayCount: today.matches.length,
+    dateLabel: today.dateLabel,
+  };
+}
+
+export async function getLeagueFreeBundle(slug: string) {
+  const {
+    buildFormStreaks,
+    buildFixtureDifficulties,
+    nextMatchdayInfo,
+    buildHeadToHead,
+    teamUpcomingDifficulty,
+  } = await import("./free-stats");
+
+  const board = await fetchRankingsBoard(slug);
+  const matches = await fetchMatchesLite(slug);
+  if (!board) return null;
+  const table = board.allTotal.length ? board.allTotal : board.total;
+  const upcoming = matches
+    .filter((m) => m.status !== "FINISHED" && m.status !== "AWARDED")
+    .sort((a, b) => a.utcDate.localeCompare(b.utcDate));
+
+  return {
+    board,
+    matches,
+    table,
+    streaks: buildFormStreaks(table, { minLength: 2, limit: 10 }),
+    hardFixtures: buildFixtureDifficulties(upcoming, table, { limit: 8 }),
+    nextMatchday: nextMatchdayInfo(matches),
+    buildHeadToHead: (a: number, b: number) => buildHeadToHead(matches, a, b),
+    teamDifficulty: (teamId: number) =>
+      teamUpcomingDifficulty(teamId, upcoming, table, 5),
+  };
+}
+
 export function apiTokenConfigured() {
   return hasApiToken();
 }
