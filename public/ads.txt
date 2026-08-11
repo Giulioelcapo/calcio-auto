@@ -1,1 +1,1 @@
-google.com, pub-5512547544373777, DIRECT, f08c47fec0942fa0
+# no adsense publisher configured

@@ -2,7 +2,6 @@ export function siteUrl(): string {
   const explicit = process.env["NEXT_PUBLIC_SITE_URL"]?.replace(/\/$/, "").trim();
   if (explicit) return explicit;
 
-  // Su Vercel, anche senza env esplicita, usa l’URL del deploy
   const vercelHost = (
     process.env["VERCEL_PROJECT_PRODUCTION_URL"] ||
     process.env["VERCEL_URL"] ||
@@ -18,12 +17,12 @@ export function siteUrl(): string {
 
 export function adsenseClient(): string | undefined {
   const id = process.env["NEXT_PUBLIC_ADSENSE_CLIENT_ID"]?.trim();
-  if (id) return id;
-  // Publisher pubblico (visibile nello snippet AdSense)
-  return "ca-pub-5512547544373777";
+  return id || undefined;
 }
 
-export function adsenseSlot(kind: "top" | "side" | "in-content"): string | undefined {
+export function adsenseSlot(
+  kind: "top" | "side" | "in-content",
+): string | undefined {
   const map = {
     top: process.env["NEXT_PUBLIC_ADSENSE_SLOT_TOP"],
     side: process.env["NEXT_PUBLIC_ADSENSE_SLOT_SIDE"],
@@ -31,6 +30,56 @@ export function adsenseSlot(kind: "top" | "side" | "in-content"): string | undef
   } as const;
   const value = map[kind]?.trim();
   return value || undefined;
+}
+
+export type PartnerSlotKind = "top" | "side" | "in-content";
+
+export type PartnerSlotConfig = {
+  href: string;
+  title: string;
+  subtitle: string;
+  cta: string;
+  external: boolean;
+};
+
+/** Banner partner/affiliate (funziona senza AdSense). */
+export function partnerSlot(kind: PartnerSlotKind): PartnerSlotConfig {
+  const map = {
+    top: {
+      href: process.env["NEXT_PUBLIC_PARTNER_TOP_URL"],
+      title: process.env["NEXT_PUBLIC_PARTNER_TOP_TITLE"],
+    },
+    side: {
+      href: process.env["NEXT_PUBLIC_PARTNER_SIDE_URL"],
+      title: process.env["NEXT_PUBLIC_PARTNER_SIDE_TITLE"],
+    },
+    "in-content": {
+      href: process.env["NEXT_PUBLIC_PARTNER_INCONTENT_URL"],
+      title: process.env["NEXT_PUBLIC_PARTNER_INCONTENT_TITLE"],
+    },
+  } as const;
+
+  const href = map[kind].href?.trim();
+  const title = map[kind].title?.trim();
+
+  if (href) {
+    return {
+      href,
+      title: title || "Partner CalcioAuto",
+      subtitle: "Offerta consigliata · apre in una nuova scheda",
+      cta: "Scopri",
+      external: /^https?:\/\//i.test(href),
+    };
+  }
+
+  // Fallback pronto: invito sponsor diretto
+  return {
+    href: "/contatti",
+    title: "Spazio partner",
+    subtitle: "Pubblicità e collaborazioni su CalcioAuto",
+    cta: "Contattaci",
+    external: false,
+  };
 }
 
 export function googleSiteVerification(): string | undefined {

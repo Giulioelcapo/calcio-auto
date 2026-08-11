@@ -24,7 +24,7 @@ const data = Barlow_Condensed({
 });
 
 const verification = googleSiteVerification();
-const adsense = adsenseClient() ?? "ca-pub-5512547544373777";
+const adsense = adsenseClient();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
@@ -41,9 +41,13 @@ export const metadata: Metadata = {
     locale: "it_IT",
     url: siteUrl(),
   },
-  other: {
-    "google-adsense-account": adsense,
-  },
+  ...(adsense
+    ? {
+        other: {
+          "google-adsense-account": adsense,
+        },
+      }
+    : {}),
   ...(verification
     ? { verification: { google: verification } }
     : {}),
@@ -57,12 +61,13 @@ export default function RootLayout({
   return (
     <html lang="it" className={`${display.variable} ${data.variable} h-full`}>
       <head>
-        {/* Snippet esatto richiesto da AdSense per la verifica */}
-        <script
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsense}`}
-          crossOrigin="anonymous"
-        />
+        {adsense ? (
+          <script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsense}`}
+            crossOrigin="anonymous"
+          />
+        ) : null}
       </head>
       <body className="flex min-h-full flex-col antialiased">
         <Header />
