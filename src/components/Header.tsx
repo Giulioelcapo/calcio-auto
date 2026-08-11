@@ -13,7 +13,7 @@ export async function Header() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <Link href="/" className="flex items-center gap-3">
           <CalcioAutoLogo className="h-10 w-10 shrink-0" />
-          <span className="display-font text-2xl font-bold uppercase tracking-[0.06em] text-[var(--accent)] sm:text-3xl">
+          <span className="display-font text-lg font-bold uppercase tracking-[0.04em] text-[var(--accent)] sm:text-2xl">
             {SITE_NAME}
           </span>
         </Link>

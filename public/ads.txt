@@ -1,1 +1,2 @@
+# Side Pitch Hub ads.txt
 google.com, pub-4342895251465402, DIRECT, f08c47fec0942fa0

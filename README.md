@@ -1,4 +1,4 @@
-# CalcioAuto
+# Side Pitch Hub
 
 Blog/web app calcio automatico, SEO-first, pronto per Google AdSense.
 

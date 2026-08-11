@@ -67,7 +67,7 @@ export function partnerSlot(kind: PartnerSlotKind): PartnerSlotConfig {
   if (href) {
     return {
       href,
-      title: title || "Partner CalcioAuto",
+      title: title || "Partner Side Pitch Hub",
       subtitle: "Offerta consigliata · apre in una nuova scheda",
       cta: "Scopri",
       external: /^https?:\/\//i.test(href),
@@ -78,7 +78,7 @@ export function partnerSlot(kind: PartnerSlotKind): PartnerSlotConfig {
   return {
     href: "/contatti",
     title: "Spazio partner",
-    subtitle: "Pubblicità e collaborazioni su CalcioAuto",
+    subtitle: "Pubblicità e collaborazioni su Side Pitch Hub",
     cta: "Contattaci",
     external: false,
   };
@@ -89,12 +89,12 @@ export function googleSiteVerification(): string | undefined {
   return code || undefined;
 }
 
-export const SITE_NAME = "CalcioAuto";
-export const SITE_TAGLINE = "Classifiche e calendari calcio automatici";
+export const SITE_NAME = "Side Pitch Hub";
+export const SITE_TAGLINE = "Classifiche, news e dati calcio automatici";
 
 export function contactEmail(): string {
   return (
     process.env["NEXT_PUBLIC_CONTACT_EMAIL"]?.trim() ||
-    "info@calcioauto.local"
+    "info@sidepitchhub.local"
   );
 }

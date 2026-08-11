@@ -106,7 +106,7 @@ export default async function NotiziePage() {
       ) : null}
 
       <p className="text-xs text-[var(--muted)]">
-        CalcioAuto non è affiliato alle testate collegate. I contenuti
+        {SITE_NAME} non è affiliato alle testate collegate. I contenuti
         appartengono alle rispettive fonti.
       </p>
     </div>

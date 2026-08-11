@@ -1,7 +1,7 @@
-/** Monogramma CA — logo CalcioAuto (opzione 1) */
+/** Monogramma — logo Side Pitch Hub */
 export function CalcioAutoLogo({
   className = "h-8 w-8",
-  title = "CalcioAuto",
+  title = "Side Pitch Hub",
 }: {
   className?: string;
   title?: string;
