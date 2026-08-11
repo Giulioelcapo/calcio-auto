@@ -1,0 +1,12 @@
+---
+description: News calcio free sempre aggiornate al giorno corrente
+alwaysApply: true
+---
+
+# News automatiche (giorno corrente)
+
+- Le news free (Google News RSS / ticker / `/notizie` / home) devono **sempre aggiornarsi automaticamente**.
+- Il giorno del sito (Europa/Roma) deve allinearsi al giorno delle news: es. **11 agosto → news dell’11 agosto**, e così via ogni giorno.
+- Non usare cache lunga sulle fetch news (`cache: "no-store"` o revalidate molto breve).
+- Preferisci feed con filtro temporale (es. `when:1d`) e ordina per data, privilegiando le news di oggi.
+- Non sostituire le news live con contenuti statici o demo inventati.

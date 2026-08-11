@@ -48,14 +48,31 @@ function parseRssItems(xml: string): NewsItem[] {
   return items;
 }
 
+function romeDayKey(d = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Rome",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
+function itemDayKey(publishedAt: string | null): string | null {
+  if (!publishedAt) return null;
+  const t = Date.parse(publishedAt);
+  if (Number.isNaN(t)) return null;
+  return romeDayKey(new Date(t));
+}
+
+/** Feed free Google News: when:1d = ultime ~24h, sempre del giorno corrente. */
 const FEEDS = [
   {
     id: "calcio",
-    url: "https://news.google.com/rss/search?q=calcio+OR+%22Serie+A%22&hl=it&gl=IT&ceid=IT:it",
+    url: "https://news.google.com/rss/search?q=calcio%20OR%20%22Serie%20A%22%20when%3A1d&hl=it&gl=IT&ceid=IT:it",
   },
   {
     id: "mercato",
-    url: "https://news.google.com/rss/search?q=mercato+calcio+Serie+A&hl=it&gl=IT&ceid=IT:it",
+    url: "https://news.google.com/rss/search?q=mercato%20calcio%20Serie%20A%20when%3A1d&hl=it&gl=IT&ceid=IT:it",
   },
 ] as const;
 
@@ -66,7 +83,8 @@ async function fetchFeed(url: string): Promise<NewsItem[]> {
         "User-Agent": "CalcioAutoBot/1.0 (+https://calcio-auto.vercel.app)",
         Accept: "application/rss+xml, application/xml, text/xml",
       },
-      next: { revalidate: 1800 },
+      // Sempre fresco: 11 agosto → news dell'11, ecc.
+      cache: "no-store",
     });
     if (!res.ok) return [];
     const xml = await res.text();
@@ -88,9 +106,21 @@ export async function getFootballNews(limit = 24): Promise<NewsItem[]> {
       if (seen.has(key)) continue;
       seen.add(key);
       merged.push(item);
-      if (merged.length >= limit) return merged;
     }
   }
 
-  return merged;
+  const today = romeDayKey();
+  merged.sort((a, b) => {
+    const aToday = itemDayKey(a.publishedAt) === today ? 1 : 0;
+    const bToday = itemDayKey(b.publishedAt) === today ? 1 : 0;
+    if (aToday !== bToday) return bToday - aToday;
+    const at = a.publishedAt ? Date.parse(a.publishedAt) : 0;
+    const bt = b.publishedAt ? Date.parse(b.publishedAt) : 0;
+    return bt - at;
+  });
+
+  // Preferisci news di oggi; se poche, completa con le più recenti when:1d
+  const ofToday = merged.filter((i) => itemDayKey(i.publishedAt) === today);
+  const rest = merged.filter((i) => itemDayKey(i.publishedAt) !== today);
+  return [...ofToday, ...rest].slice(0, limit);
 }
