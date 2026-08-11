@@ -18,12 +18,21 @@ export type ScoutPlayer = {
   category: ScoutCategory;
   categoryLabel: string;
   scoutScore: number;
-  blurb: string;
-  goals: number;
-  assists: number;
-  played: number;
-  goalsPerGame: number;
-  teamPosition: number | null;
+  /** KPI free football-data + derivati */
+  kpis: {
+    goals: number;
+    assists: number;
+    penalties: number;
+    played: number;
+    openPlayGoals: number;
+    goalInvolvements: number;
+    goalsPerGame: number;
+    assistsPerGame: number;
+    involvementsPerGame: number;
+    penaltyShare: number | null;
+    teamPosition: number | null;
+    rank: number;
+  };
 };
 
 export type ClubRadar = {
@@ -35,13 +44,24 @@ export type ClubRadar = {
   leagueSlug: string;
   focus: string;
   score: number;
-  blurb: string;
-  metrics: {
+  /** KPI free classifica + indici derivati */
+  kpis: {
     position: number;
+    played: number;
+    won: number;
+    draw: number;
+    lost: number;
+    goalsFor: number;
+    goalsAgainst: number;
+    goalDiff: number;
+    points: number;
+    form: string | null;
     formScore: number;
+    ppg: number;
+    gfPerGame: number;
+    gaPerGame: number;
     attackIndex: number;
     defenseIndex: number;
-    ppg: number;
   };
 };
 
@@ -60,10 +80,10 @@ type PlayerInput = ScorerRow & {
 };
 
 const CATEGORY_LABEL: Record<ScoutCategory, string> = {
-  hot: "Hot streak",
-  gem: "Hidden gem",
-  creator: "Playmaker",
-  clinical: "Clinical finisher",
+  hot: "Hot",
+  gem: "Gem",
+  creator: "Creator",
+  clinical: "Clinical",
   breakout: "Breakout",
 };
 
@@ -84,14 +104,9 @@ function parseFormScore(form: string | null): number {
   return Math.round(raw * 100);
 }
 
-/**
- * Algoritmo ScoutScore (0–100): volume gol, efficienza, assist,
- * contesto classifica e dipendenza dai rigori.
- */
 export function computeScoutScore(input: PlayerInput): {
   score: number;
   category: ScoutCategory;
-  blurb: string;
 } {
   const played = Math.max(1, input.playedMatches ?? input.teamPlayed ?? 1);
   const goals = input.goals;
@@ -105,36 +120,39 @@ export function computeScoutScore(input: PlayerInput): {
   const volume = clamp(goals * 8);
   const efficiency = clamp(gpg * 55);
   const creation = clamp(apg * 70 + assists * 4);
-  const context = clamp(35 + (pos - 1) * 3); // squadre più basse = gem potenziale
+  const context = clamp(35 + (pos - 1) * 3);
   const purity = clamp(openPlayShare * 100);
 
-  const hotScore = volume * 0.35 + efficiency * 0.45 + creation * 0.2;
-  const gemScore = efficiency * 0.35 + context * 0.4 + purity * 0.25;
-  const creatorScore = creation * 0.55 + volume * 0.2 + efficiency * 0.25;
-  const clinicalScore = efficiency * 0.5 + purity * 0.35 + volume * 0.15;
-  const breakoutScore =
-    efficiency * 0.4 + volume * 0.25 + context * 0.2 + creation * 0.15;
+  const ranked = (
+    [
+      {
+        category: "hot" as const,
+        score: volume * 0.35 + efficiency * 0.45 + creation * 0.2,
+      },
+      {
+        category: "gem" as const,
+        score: efficiency * 0.35 + context * 0.4 + purity * 0.25,
+      },
+      {
+        category: "creator" as const,
+        score: creation * 0.55 + volume * 0.2 + efficiency * 0.25,
+      },
+      {
+        category: "clinical" as const,
+        score: efficiency * 0.5 + purity * 0.35 + volume * 0.15,
+      },
+      {
+        category: "breakout" as const,
+        score:
+          efficiency * 0.4 + volume * 0.25 + context * 0.2 + creation * 0.15,
+      },
+    ] satisfies Array<{ category: ScoutCategory; score: number }>
+  ).sort((a, b) => b.score - a.score);
 
-  const ranked: Array<{ category: ScoutCategory; score: number }> = [
-    { category: "hot" as const, score: hotScore },
-    { category: "gem" as const, score: gemScore },
-    { category: "creator" as const, score: creatorScore },
-    { category: "clinical" as const, score: clinicalScore },
-    { category: "breakout" as const, score: breakoutScore },
-  ].sort((a, b) => b.score - a.score);
-
-  const best = ranked[0];
-  const score = Math.round(clamp(best.score));
-
-  const blurbs: Record<ScoutCategory, string> = {
-    hot: `${goals} gol in ${played} partite (${gpg.toFixed(2)}/gara): volume e ritmo da monitoraggio prioritario.`,
-    gem: `Rende ${gpg.toFixed(2)} gol/gara in una squadra ${pos <= 6 ? "già alta" : `intorno al ${pos}° posto`}: profilo da approfondire.`,
-    creator: `${assists} assist e ${goals} gol: contributo creativo sopra la media del campione.`,
-    clinical: `Alta efficienza (${gpg.toFixed(2)} gol/gara)${pens ? ` con ${pens} su rigore` : " soprattutto a gioco aperto"}.`,
-    breakout: `Mix crescita/impatto (ScoutScore ${score}): candidato breakout per la lista osservatori.`,
+  return {
+    score: Math.round(clamp(ranked[0].score)),
+    category: ranked[0].category,
   };
-
-  return { score, category: best.category, blurb: blurbs[best.category] };
 }
 
 export function buildScoutPlayers(
@@ -151,7 +169,12 @@ export function buildScoutPlayers(
     seen.add(key);
 
     const played = Math.max(1, row.playedMatches ?? row.teamPlayed ?? 1);
-    const { score, category, blurb } = computeScoutScore(row);
+    const goals = row.goals;
+    const assists = row.assists ?? 0;
+    const penalties = row.penalties ?? 0;
+    const openPlayGoals = Math.max(0, goals - penalties);
+    const goalInvolvements = goals + assists;
+    const { score, category } = computeScoutScore(row);
 
     picks.push({
       id: key,
@@ -164,22 +187,27 @@ export function buildScoutPlayers(
       category,
       categoryLabel: CATEGORY_LABEL[category],
       scoutScore: score,
-      blurb,
-      goals: row.goals,
-      assists: row.assists ?? 0,
-      played,
-      goalsPerGame: Number((row.goals / played).toFixed(2)),
-      teamPosition: row.teamPosition,
+      kpis: {
+        goals,
+        assists,
+        penalties,
+        played,
+        openPlayGoals,
+        goalInvolvements,
+        goalsPerGame: Number((goals / played).toFixed(2)),
+        assistsPerGame: Number((assists / played).toFixed(2)),
+        involvementsPerGame: Number((goalInvolvements / played).toFixed(2)),
+        penaltyShare:
+          goals > 0 ? Number(((penalties / goals) * 100).toFixed(0)) : null,
+        teamPosition: row.teamPosition,
+        rank: row.rank,
+      },
     });
   }
 
   return picks.sort((a, b) => b.scoutScore - a.scoutScore).slice(0, limit);
 }
 
-/**
- * Radar club quando i marcatori non sono ancora disponibili:
- * attacco, difesa, forma e punti/gara.
- */
 export function buildClubRadar(
   entries: Array<{
     leagueName: string;
@@ -205,57 +233,44 @@ export function buildClubRadar(
 
     for (const row of entry.standings) {
       const played = Math.max(1, row.playedGames);
-      if (row.playedGames <= 0 && row.points <= 0 && row.goalsFor <= 0) {
-        // Pre-stagione: ranking editoriale su posizione seed
-        const seed = clamp(100 - (row.position - 1) * 4);
-        clubs.push({
-          id: `${entry.leagueSlug}:${row.teamId}`,
-          teamName: row.teamName,
-          teamId: row.teamId,
-          crest: row.crest,
-          leagueName: entry.leagueName,
-          leagueSlug: entry.leagueSlug,
-          focus: row.position <= 6 ? "Big club watch" : "Sviluppo / under radar",
-          score: seed,
-          blurb:
-            row.position <= 6
-              ? "Club di fascia alta: priorità scouting su reparti offensivi e giovani pronti."
-              : "Club di medio-bassa classifica: terreno tipico per gemme e breakout.",
-          metrics: {
-            position: row.position,
-            formScore: 50,
-            attackIndex: 50,
-            defenseIndex: 50,
-            ppg: 0,
-          },
-        });
-        continue;
-      }
-
       const gfRate = row.goalsFor / played;
       const gaRate = row.goalsAgainst / played;
       const formScore = parseFormScore(row.form);
-      const attackIndex = Math.round(
-        (gfRate / Math.max(0.1, leagueGf)) * 100,
-      );
-      const defenseIndex = Math.round(
-        (Math.max(0.1, leagueGa) / Math.max(0.1, gaRate)) * 100,
-      );
-      const ppg = row.points / played;
-      const score = Math.round(
-        clamp(
-          attackIndex * 0.35 +
-            defenseIndex * 0.25 +
-            formScore * 0.25 +
-            ppg * 15,
-        ),
-      );
+      const attackIndex =
+        row.playedGames > 0
+          ? Math.round((gfRate / Math.max(0.1, leagueGf)) * 100)
+          : 50;
+      const defenseIndex =
+        row.playedGames > 0
+          ? Math.round(
+              (Math.max(0.1, leagueGa) / Math.max(0.1, gaRate)) * 100,
+            )
+          : 50;
+      const ppg = row.playedGames > 0 ? row.points / played : 0;
+      const score =
+        row.playedGames > 0
+          ? Math.round(
+              clamp(
+                attackIndex * 0.35 +
+                  defenseIndex * 0.25 +
+                  formScore * 0.25 +
+                  ppg * 15,
+              ),
+            )
+          : clamp(100 - (row.position - 1) * 4);
 
-      let focus = "Equilibrio";
-      if (attackIndex >= 120 && formScore >= 60) focus = "Attacco da seguire";
-      else if (defenseIndex >= 120) focus = "Blocco difensivo";
-      else if (formScore >= 75) focus = "Forma calda";
-      else if (row.position >= 12 && attackIndex >= 100) focus = "Talenti nascosti";
+      let focus = "Balance";
+      if (row.playedGames <= 0) {
+        focus = row.position <= 6 ? "Top" : "Watch";
+      } else if (attackIndex >= 120 && formScore >= 60) {
+        focus = "Attack";
+      } else if (defenseIndex >= 120) {
+        focus = "Defense";
+      } else if (formScore >= 75) {
+        focus = "Form";
+      } else if (row.position >= 12 && attackIndex >= 100) {
+        focus = "Gem club";
+      }
 
       clubs.push({
         id: `${entry.leagueSlug}:${row.teamId}`,
@@ -266,13 +281,23 @@ export function buildClubRadar(
         leagueSlug: entry.leagueSlug,
         focus,
         score,
-        blurb: `${focus}: attacco ${attackIndex}, difesa ${defenseIndex}, forma ${formScore}.`,
-        metrics: {
+        kpis: {
           position: row.position,
+          played: row.playedGames,
+          won: row.won,
+          draw: row.draw,
+          lost: row.lost,
+          goalsFor: row.goalsFor,
+          goalsAgainst: row.goalsAgainst,
+          goalDiff: row.goalDifference,
+          points: row.points,
+          form: row.form,
           formScore,
+          ppg: Number(ppg.toFixed(2)),
+          gfPerGame: Number(gfRate.toFixed(2)),
+          gaPerGame: Number(gaRate.toFixed(2)),
           attackIndex,
           defenseIndex,
-          ppg: Number(ppg.toFixed(2)),
         },
       });
     }

@@ -18,7 +18,26 @@ function categoryTone(category: ScoutPlayer["category"]) {
   }
 }
 
+function Kpi({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number | null | undefined;
+}) {
+  if (value == null || value === "") return null;
+  return (
+    <div className="rounded border border-[var(--line)] bg-black/20 px-1.5 py-1.5 text-center">
+      <div className="data-font text-sm font-bold text-[var(--ink)]">{value}</div>
+      <div className="text-[9px] uppercase tracking-wide text-[var(--muted)]">
+        {label}
+      </div>
+    </div>
+  );
+}
+
 function PlayerCard({ player }: { player: ScoutPlayer }) {
+  const k = player.kpis;
   return (
     <article className="panel flex h-full flex-col gap-3 p-4 transition hover:border-[var(--accent)]">
       <div className="flex items-start justify-between gap-3">
@@ -37,7 +56,8 @@ function PlayerCard({ player }: { player: ScoutPlayer }) {
           >
             <Crest src={player.teamCrest} alt={player.teamName} size={18} />
             <span className="truncate">
-              {player.teamName} · {player.leagueName}
+              {player.teamName}
+              {k.teamPosition != null ? ` · #${k.teamPosition}` : ""}
             </span>
           </Link>
         </div>
@@ -46,46 +66,34 @@ function PlayerCard({ player }: { player: ScoutPlayer }) {
             {player.scoutScore}
           </div>
           <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
-            ScoutScore
+            Score
           </div>
         </div>
       </div>
 
-      <p className="text-sm leading-relaxed text-[var(--muted)]">{player.blurb}</p>
-
-      <div className="mt-auto grid grid-cols-4 gap-2 border-t border-[var(--line)] pt-3 text-center text-[11px]">
-        <div>
-          <div className="data-font text-base font-bold text-[var(--ink)]">
-            {player.goals}
-          </div>
-          <div className="text-[var(--muted)]">Gol</div>
-        </div>
-        <div>
-          <div className="data-font text-base font-bold text-[var(--ink)]">
-            {player.assists}
-          </div>
-          <div className="text-[var(--muted)]">Assist</div>
-        </div>
-        <div>
-          <div className="data-font text-base font-bold text-[var(--ink)]">
-            {player.goalsPerGame}
-          </div>
-          <div className="text-[var(--muted)]">Gol/G</div>
-        </div>
-        <div>
-          <div className="data-font text-base font-bold text-[var(--ink)]">
-            {player.played}
-          </div>
-          <div className="text-[var(--muted)]">Partite</div>
-        </div>
+      <div className="mt-auto grid grid-cols-4 gap-1.5 sm:grid-cols-5">
+        <Kpi label="Gol" value={k.goals} />
+        <Kpi label="Ast" value={k.assists} />
+        <Kpi label="Rig" value={k.penalties} />
+        <Kpi label="PG" value={k.played} />
+        <Kpi label="G+A" value={k.goalInvolvements} />
+        <Kpi label="Open" value={k.openPlayGoals} />
+        <Kpi label="G/G" value={k.goalsPerGame} />
+        <Kpi label="A/G" value={k.assistsPerGame} />
+        <Kpi label="Inv/G" value={k.involvementsPerGame} />
+        <Kpi
+          label="%Rig"
+          value={k.penaltyShare != null ? `${k.penaltyShare}%` : null}
+        />
       </div>
     </article>
   );
 }
 
 function ClubCard({ club }: { club: ClubRadar }) {
+  const k = club.kpis;
   return (
-    <article className="panel flex h-full flex-col gap-2 p-4">
+    <article className="panel flex h-full flex-col gap-3 p-4">
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <Crest src={club.crest} alt={club.teamName} size={28} />
@@ -97,7 +105,7 @@ function ClubCard({ club }: { club: ClubRadar }) {
               {club.teamName}
             </Link>
             <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
-              {club.leagueName} · #{club.metrics.position}
+              {club.leagueName} · #{k.position} · {club.focus}
             </p>
           </div>
         </div>
@@ -106,14 +114,27 @@ function ClubCard({ club }: { club: ClubRadar }) {
             {club.score}
           </div>
           <div className="text-[10px] uppercase tracking-wide text-[var(--muted)]">
-            Radar
+            Score
           </div>
         </div>
       </div>
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
-        {club.focus}
-      </p>
-      <p className="text-sm text-[var(--muted)]">{club.blurb}</p>
+
+      <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-5">
+        <Kpi label="G" value={k.played} />
+        <Kpi label="V" value={k.won} />
+        <Kpi label="N" value={k.draw} />
+        <Kpi label="P" value={k.lost} />
+        <Kpi label="Pt" value={k.points} />
+        <Kpi label="GF" value={k.goalsFor} />
+        <Kpi label="GS" value={k.goalsAgainst} />
+        <Kpi label="DR" value={k.goalDiff} />
+        <Kpi label="PPG" value={k.ppg} />
+        <Kpi label="Form" value={k.form ?? k.formScore} />
+        <Kpi label="GF/G" value={k.gfPerGame} />
+        <Kpi label="GS/G" value={k.gaPerGame} />
+        <Kpi label="ATK" value={k.attackIndex} />
+        <Kpi label="DEF" value={k.defenseIndex} />
+      </div>
     </article>
   );
 }
@@ -128,18 +149,14 @@ export function OsservatoriSection({
   const players = compact ? report.players.slice(0, 3) : report.players;
   const clubs = compact ? report.clubs.slice(0, 3) : report.clubs;
 
+  if (!players.length && !clubs.length) return null;
+
   return (
     <section className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3 border-b-2 border-[var(--accent)] pb-2">
-        <div>
-          <h2 className="display-font text-[clamp(1.35rem,3vw,1.85rem)] font-bold uppercase tracking-[0.04em]">
-            Osservatori
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm text-[var(--muted)]">
-            ScoutScore CalcioAuto: algoritmi su gol, efficienza, assist e
-            contesto classifica. Non è un report ufficiale di agenzie.
-          </p>
-        </div>
+        <h2 className="display-font text-[clamp(1.35rem,3vw,1.85rem)] font-bold uppercase tracking-[0.04em]">
+          Osservatori
+        </h2>
         {compact ? (
           <Link
             href="/osservatori"
@@ -150,29 +167,21 @@ export function OsservatoriSection({
         ) : null}
       </div>
 
-      {report.hasPlayers ? (
+      {players.length ? (
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {players.map((player) => (
             <PlayerCard key={player.id} player={player} />
           ))}
         </div>
-      ) : (
-        <div className="panel space-y-2 p-4">
-          <p className="text-sm font-medium">
-            Marcatori ufficiali non ancora disponibili
-          </p>
-          <p className="text-sm text-[var(--muted)]">
-            Gli algoritmi giocatore si attivano con i primi gol di stagione. Nel
-            frattempo resta attivo il radar club.
-          </p>
-        </div>
-      )}
+      ) : null}
 
       {clubs.length ? (
         <div className="space-y-3">
-          <h3 className="display-font text-sm font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
-            Radar club
-          </h3>
+          {players.length ? (
+            <h3 className="display-font text-sm font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
+              Club
+            </h3>
+          ) : null}
           <div className="grid gap-3 md:grid-cols-3">
             {clubs.map((club) => (
               <ClubCard key={club.id} club={club} />
