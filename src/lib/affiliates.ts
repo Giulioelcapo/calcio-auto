@@ -1,5 +1,5 @@
 /**
- * Affiliazioni Amazon.it — obiettivo: click outbound (traffico affiliate).
+ * Affiliazioni Amazon.it — prodotti reali (ASIN) + foto CDN Amazon.
  * Tag: NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG (es. sidepitchhub2-21)
  */
 
@@ -9,83 +9,99 @@ export type AffiliateOffer = {
   title: string;
   subtitle: string;
   cta: string;
+  /** ASIN Amazon.it → link prodotto reale + commissione */
+  asin: string;
+  /** Foto prodotto ufficiale m.media-amazon.com */
   imageSrc: string;
   imageAlt: string;
   amazonQuery: string;
-  fallbackHref: string;
 };
+
+/** Foto prodotto Amazon (CDN ufficiale). */
+export function amazonCdnImage(imageId: string, size = 500): string {
+  return `https://m.media-amazon.com/images/I/${imageId}._AC_SL${size}_.jpg`;
+}
+
+export function amazonProductUrl(asin: string, tag?: string): string {
+  const t = tag ?? amazonAssociateTag();
+  const params = new URLSearchParams();
+  if (t) params.set("tag", t);
+  const q = params.toString();
+  return q
+    ? `https://www.amazon.it/dp/${asin}?${q}`
+    : `https://www.amazon.it/dp/${asin}`;
+}
 
 export const AFFILIATE_OFFERS: AffiliateOffer[] = [
   {
     id: "kit",
     slot: "top",
-    title: "Maglie ufficiali",
-    subtitle: "Kit 2026 · prezzi Amazon.it",
+    title: "Maglia Italia adidas",
+    subtitle: "Disponibile su Amazon.it",
     cta: "Apri su Amazon",
-    imageSrc: "/partner/kit.jpg",
-    imageAlt: "Gear da calcio",
+    asin: "B0DM6CQVMC",
+    imageSrc: amazonCdnImage("81xfnM-HCjL"),
+    imageAlt: "Maglia ufficiale Italia adidas su Amazon.it",
     amazonQuery: "maglia calcio ufficiale",
-    fallbackHref: "https://www.amazon.it/s?k=maglia+calcio+ufficiale",
   },
   {
     id: "ball",
     slot: "side",
-    title: "Palloni match",
-    subtitle: "Training e gara",
+    title: "Pallone adidas Starlancer",
+    subtitle: "Disponibile su Amazon.it",
     cta: "Apri su Amazon",
-    imageSrc: "/partner/ball.jpg",
-    imageAlt: "Pallone da calcio",
+    asin: "B0CPYBMVDL",
+    imageSrc: amazonCdnImage("71I90TKsdGL"),
+    imageAlt: "Pallone adidas Starlancer Club su Amazon.it",
     amazonQuery: "pallone calcio professionale",
-    fallbackHref: "https://www.amazon.it/s?k=pallone+calcio+professionale",
   },
   {
     id: "gear",
     slot: "in-content",
-    title: "Scarpe e tacchetti",
-    subtitle: "Nike · Adidas · Puma",
+    title: "Scarpe Puma Ultra 6",
+    subtitle: "Disponibile su Amazon.it",
     cta: "Apri su Amazon",
-    imageSrc: "/partner/boots.jpg",
-    imageAlt: "Scarpe da calcio",
+    asin: "B0DJ9H9MNJ",
+    imageSrc: amazonCdnImage("71rhBo-UneL"),
+    imageAlt: "Scarpe da calcio Puma Ultra 6 Match su Amazon.it",
     amazonQuery: "scarpe calcio tacchetti",
-    fallbackHref: "https://www.amazon.it/s?k=scarpe+calcio+tacchetti",
   },
 ];
 
-/** Extra deal per rail / pagina shop (più punti di click). */
 export const AMAZON_TRAFFIC_DEALS: AffiliateOffer[] = [
   ...AFFILIATE_OFFERS,
   {
     id: "fan",
     slot: "top",
-    title: "Gadget e tifo",
-    subtitle: "Sciarpe, cappelli, accessori",
+    title: "Maglia Juventus adidas",
+    subtitle: "Disponibile su Amazon.it",
     cta: "Apri su Amazon",
-    imageSrc: "/partner/kit.jpg",
-    imageAlt: "Accessori tifo calcio",
-    amazonQuery: "gadget calcio tifoso",
-    fallbackHref: "https://www.amazon.it/s?k=gadget+calcio+tifoso",
+    asin: "B0DM36B4M5",
+    imageSrc: amazonCdnImage("71MVjnMxd5L"),
+    imageAlt: "Maglia Juventus adidas su Amazon.it",
+    amazonQuery: "maglia juventus",
   },
   {
     id: "training",
     slot: "side",
-    title: "Allenamento",
-    subtitle: "Coni, scale, reti",
+    title: "Coni allenamento",
+    subtitle: "Disponibile su Amazon.it",
     cta: "Apri su Amazon",
-    imageSrc: "/partner/ball.jpg",
-    imageAlt: "Attrezzatura training calcio",
+    asin: "B0CGGSK9PN",
+    imageSrc: amazonCdnImage("71ymvLejTGL"),
+    imageAlt: "Coni allenamento calcio su Amazon.it",
     amazonQuery: "attrezzatura allenamento calcio",
-    fallbackHref: "https://www.amazon.it/s?k=attrezzatura+allenamento+calcio",
   },
   {
     id: "kids",
     slot: "in-content",
-    title: "Calcio kids",
-    subtitle: "Palloni e kit junior",
+    title: "Pallone mini adidas",
+    subtitle: "Disponibile su Amazon.it",
     cta: "Apri su Amazon",
-    imageSrc: "/partner/boots.jpg",
-    imageAlt: "Calcio bambini",
+    asin: "B0F4K5MJXF",
+    imageSrc: amazonCdnImage("61QpbuHTpDL"),
+    imageAlt: "Pallone adidas Starlancer Mini su Amazon.it",
     amazonQuery: "pallone calcio bambini",
-    fallbackHref: "https://www.amazon.it/s?k=pallone+calcio+bambini",
   },
 ];
 
@@ -101,7 +117,6 @@ export function amazonSearchUrl(query: string, tag?: string): string {
   return `https://www.amazon.it/s?${params.toString()}`;
 }
 
-/** Homepage Amazon.it con tag (max traffico generico). */
 export function amazonHomeUrl(tag?: string): string {
   const t = tag ?? amazonAssociateTag();
   const params = new URLSearchParams();
@@ -111,6 +126,7 @@ export function amazonHomeUrl(tag?: string): string {
 }
 
 export function offerHref(offer: AffiliateOffer): string {
+  if (offer.asin) return amazonProductUrl(offer.asin);
   return amazonSearchUrl(offer.amazonQuery);
 }
 
@@ -118,7 +134,6 @@ export function offerBySlot(slot: AffiliateOffer["slot"]): AffiliateOffer {
   return AFFILIATE_OFFERS.find((o) => o.slot === slot) ?? AFFILIATE_OFFERS[0];
 }
 
-/** Maglia contestuale: lega o squadra → più conversioni. */
 export function amazonJerseyQuery(label: string): string {
   const clean = label.replace(/\s+/g, " ").trim();
   return `maglia ${clean} ufficiale`;
@@ -132,7 +147,7 @@ export const AMAZON_ASSOCIATES_JOIN =
   "https://programma-affiliazione.amazon.it/";
 
 export const AMAZON_DISCLOSURE =
-  "Link Amazon: in qualità di Affiliato Amazon, Side Pitch Hub riceve un guadagno dagli acquisti idonei.";
+  "Link Amazon: in qualità di Affiliato Amazon, Side Pitch Hub riceve un guadagno dagli acquisti idonei. Foto prodotto © Amazon.";
 
 export const SPONSOR_MAIL =
   "mailto:info@sidepitchhub.com?subject=Sponsor%20Side%20Pitch%20Hub";

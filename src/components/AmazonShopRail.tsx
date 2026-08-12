@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import { AmazonProductImage } from "@/components/AmazonProductImage";
 import {
   AMAZON_DISCLOSURE,
   AMAZON_TRAFFIC_DEALS,
@@ -8,15 +8,11 @@ import {
 } from "@/lib/affiliates";
 
 type Props = {
-  /** Quante card (default 6). */
   limit?: number;
-  /** Titolo sezione. */
   title?: string;
 };
 
-/**
- * Rail shop Amazon: più card + CTA “Apri su Amazon” per outbound traffic.
- */
+/** Rail shop Amazon: prodotti reali (foto CDN Amazon + link ASIN). */
 export function AmazonShopRail({
   limit = 6,
   title = "Shop Amazon",
@@ -29,7 +25,7 @@ export function AmazonShopRail({
       <div className="flex flex-wrap items-end justify-between gap-3 border-b-2 border-[var(--accent)] pb-2">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
-            Affiliate · Amazon.it
+            Affiliate · Foto prodotto Amazon
           </p>
           <h2 className="display-font text-[clamp(1.35rem,3vw,1.85rem)] font-bold uppercase tracking-[0.04em]">
             {title}
@@ -62,13 +58,11 @@ export function AmazonShopRail({
             rel="noopener noreferrer sponsored"
             className="panel group w-[72%] max-w-[220px] shrink-0 overflow-hidden transition hover:border-[var(--accent)] sm:w-auto sm:max-w-none"
           >
-            <div className="relative aspect-[4/3] overflow-hidden bg-[var(--panel-2)]">
-              <Image
+            <div className="relative aspect-square overflow-hidden bg-white">
+              <AmazonProductImage
                 src={offer.imageSrc}
                 alt={offer.imageAlt}
-                fill
                 sizes="180px"
-                className="object-cover transition duration-500 group-hover:scale-[1.05]"
               />
             </div>
             <div className="space-y-1 p-3">
