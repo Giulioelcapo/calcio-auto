@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Barlow_Condensed, Oswald, Source_Sans_3 } from "next/font/google";
 import { CookieBanner } from "@/components/CookieBanner";
+import { AmazonFooterStrip } from "@/components/AmazonFooterStrip";
 import { Footer, Header } from "@/components/Header";
 import {
   SITE_NAME,
@@ -83,6 +84,7 @@ export default function RootLayout({
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:py-8">
           {children}
         </main>
+        <AmazonFooterStrip />
         <Footer />
         <CookieBanner />
       </body>

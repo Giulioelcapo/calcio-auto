@@ -1,128 +1,121 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import {
-  AFFILIATE_OFFERS,
   AMAZON_ASSOCIATES_JOIN,
+  AMAZON_DISCLOSURE,
   amazonAssociateTag,
-  offerHref,
+  amazonHomeUrl,
+  amazonSearchUrl,
   SPONSOR_MAIL,
 } from "@/lib/affiliates";
+import { AmazonShopRail } from "@/components/AmazonShopRail";
 import { SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Partner e affiliazioni",
-  description: `Partner commerciali di ${SITE_NAME}: shop calcio, sponsor e collaborazioni.`,
+  title: "Shop Amazon — maglie, scarpe e gear",
+  description: `Shop Amazon.it su ${SITE_NAME}: maglie ufficiali, palloni, scarpe e gadget calcio. Link affiliate.`,
   alternates: { canonical: "/partner" },
 };
 
+const QUICK = [
+  { label: "Maglie ufficiali", q: "maglia calcio ufficiale" },
+  { label: "Serie A kit", q: "maglia Serie A ufficiale" },
+  { label: "Premier League", q: "maglia Premier League ufficiale" },
+  { label: "Scarpe calcio", q: "scarpe calcio tacchetti" },
+  { label: "Palloni", q: "pallone calcio professionale" },
+  { label: "Regali tifo", q: "regalo tifoso calcio" },
+] as const;
+
 export default function PartnerPage() {
   const tag = amazonAssociateTag();
+  const store = amazonHomeUrl();
 
   return (
     <div className="space-y-8">
-      <section className="space-y-2">
+      <section className="space-y-3">
         <p className="display-font text-xs font-bold uppercase tracking-[0.28em] text-[var(--accent)]">
-          Monetizzazione
+          Affiliate · Amazon.it
         </p>
         <h1 className="display-font text-4xl font-bold uppercase tracking-tight sm:text-5xl">
-          Partner
+          Shop Amazon
         </h1>
         <p className="max-w-2xl text-sm text-[var(--muted)]">
-          Offerte shop e spazi sponsor. Nessuna scommessa.
+          Offerte calcio su Amazon.it. Ogni click supporta {SITE_NAME}.
         </p>
-      </section>
-
-      <section className="grid gap-3 md:grid-cols-3">
-        {AFFILIATE_OFFERS.map((offer) => (
+        <div className="flex flex-wrap gap-2">
           <a
-            key={offer.id}
-            href={offerHref(offer)}
+            href={store}
             target="_blank"
             rel="noopener noreferrer sponsored"
-            className="panel group block overflow-hidden transition hover:border-[var(--accent)]"
+            className="btn-accent inline-flex px-4 py-2 text-xs uppercase tracking-[0.14em]"
           >
-            <div className="relative aspect-[16/10] overflow-hidden bg-[var(--panel-2)]">
-              <Image
-                src={offer.imageSrc}
-                alt={offer.imageAlt}
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-                className="object-cover transition duration-500 group-hover:scale-[1.04]"
-              />
-            </div>
-            <div className="p-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
-                Affiliate · Amazon
-              </p>
-              <h2 className="display-font mt-2 text-xl font-bold uppercase">
-                {offer.title}
-              </h2>
-              <p className="mt-1 text-sm text-[var(--muted)]">{offer.subtitle}</p>
-              <span className="btn-accent mt-4 inline-flex px-3 py-1.5 text-xs uppercase tracking-[0.12em]">
-                {offer.cta}
-              </span>
-            </div>
+            Apri Amazon.it
           </a>
-        ))}
+          <a
+            href={amazonSearchUrl("calcio")}
+            target="_blank"
+            rel="noopener noreferrer sponsored"
+            className="inline-flex border border-[var(--line)] px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] hover:border-[var(--accent)]"
+          >
+            Cerca “calcio”
+          </a>
+        </div>
       </section>
+
+      <section className="space-y-3">
+        <h2 className="display-font text-lg font-bold uppercase">
+          Ricerche rapide
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {QUICK.map((item) => (
+            <a
+              key={item.q}
+              href={amazonSearchUrl(item.q)}
+              target="_blank"
+              rel="noopener noreferrer sponsored"
+              className="border border-[var(--line)] px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            >
+              {item.label} →
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <AmazonShopRail title="Categorie in evidenza" limit={6} />
 
       <section className="panel space-y-3 p-5">
         <h2 className="display-font text-lg font-bold uppercase">Sponsor</h2>
         <p className="text-sm text-[var(--muted)]">
-          Banner e collaborazioni su {SITE_NAME}. Scrivi a{" "}
+          Banner e collaborazioni:{" "}
           <a
             href={SPONSOR_MAIL}
             className="text-[var(--accent)] hover:underline"
           >
             info@sidepitchhub.com
           </a>
-          .
         </p>
-        <div className="flex flex-wrap gap-2">
-          <a
-            href={SPONSOR_MAIL}
-            className="btn-accent inline-flex px-3 py-1.5 text-xs uppercase tracking-[0.12em]"
-          >
-            Contatta sponsor
-          </a>
-          <Link
-            href="/contatti"
-            className="inline-flex border border-[var(--line)] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] hover:border-[var(--accent)]"
-          >
-            Contatti
-          </Link>
-        </div>
+        <Link
+          href="/contatti"
+          className="inline-flex text-xs font-bold uppercase tracking-[0.12em] text-[var(--muted)] hover:text-[var(--accent)]"
+        >
+          Contatti →
+        </Link>
       </section>
 
-      <section className="panel space-y-2 p-5 text-sm text-[var(--muted)]">
-        <h2 className="display-font text-base font-bold uppercase text-[var(--ink)]">
-          Amazon Associates
-        </h2>
-        <p>
-          {SITE_NAME} è partecipante al Programma Affiliazione Amazon EU.
-          Acquistando dai link potremmo ricevere una commissione, senza costi
-          extra per te.
-        </p>
+      <section className="space-y-2 text-sm text-[var(--muted)]">
+        <p>{AMAZON_DISCLOSURE}</p>
         {tag ? (
           <p>
-            Tag attivo:{" "}
-            <span className="data-font text-[var(--accent)]">{tag}</span>
+            Tag: <span className="data-font text-[var(--accent)]">{tag}</span>
           </p>
-        ) : (
-          <p>
-            Per le commissioni: iscriviti e imposta{" "}
-            <span className="data-font">NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG</span>{" "}
-            su Vercel (es. <span className="data-font">tuonome-21</span>).
-          </p>
-        )}
+        ) : null}
         <a
           href={AMAZON_ASSOCIATES_JOIN}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex text-[var(--accent)] hover:underline"
         >
-          programma-affiliazione.amazon.it →
+          Programma Affiliazione Amazon →
         </a>
       </section>
     </div>

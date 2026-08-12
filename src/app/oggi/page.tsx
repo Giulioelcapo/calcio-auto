@@ -138,6 +138,7 @@ export default async function OggiPage() {
       ) : null}
 
       <AdSlot slot="in-content" />
+      <AmazonShopRail title="Gear per il matchday" limit={3} />
     </div>
   );
 }

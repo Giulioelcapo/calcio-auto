@@ -75,6 +75,8 @@ export default async function HomePage() {
 
       <AdSlot slot="top" />
 
+      <PartnerOffers compact />
+
       <section className="space-y-4">
         <div className="section-rule">
           <h2>Sondaggio</h2>
@@ -235,8 +237,6 @@ export default async function HomePage() {
       <FreeDeskSection report={freeDesk} compact />
 
       <OsservatoriSection report={osservatori} compact />
-
-      <PartnerOffers compact />
 
       <section className="space-y-4">
         <div className="section-rule">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdSlot } from "@/components/AdSlot";
+import { AmazonContextPromo } from "@/components/AmazonContextPromo";
 import { InsightCards } from "@/components/DataViews";
 import { ContentBlock, LeagueNav, MockBanner } from "@/components/LeagueNav";
 import { leagueHubIntro } from "@/lib/content-templates";
@@ -69,6 +70,7 @@ export default async function LeagueHubPage({ params }: Props) {
       </div>
       <LeagueNav slug={slug} />
       <AdSlot slot="top" />
+      <AmazonContextPromo label={data.league.name} kind="league" />
       <ContentBlock>{leagueHubIntro(data)}</ContentBlock>
 
       {hotStreaks.length ? (
