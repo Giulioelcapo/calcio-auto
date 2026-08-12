@@ -73,13 +73,37 @@ export async function isBlogAdminRequest(): Promise<boolean> {
 }
 
 export function adminCookieOptions(token: string) {
-  return {
+  const opts: {
+    name: string;
+    value: string;
+    httpOnly: boolean;
+    secure: boolean;
+    sameSite: "lax";
+    path: string;
+    maxAge: number;
+    domain?: string;
+  } = {
     name: BLOG_ADMIN_COOKIE,
     value: token,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
+    sameSite: "lax",
     path: "/",
     maxAge: MAX_AGE_SEC,
   };
+
+  // Stesso cookie su apex e www (solo in deploy Vercel, non in locale)
+  if (process.env.VERCEL) {
+    try {
+      const host = new URL(
+        process.env.NEXT_PUBLIC_SITE_URL || "https://sidepitchhub.com",
+      ).hostname;
+      if (host === "sidepitchhub.com" || host.endsWith(".sidepitchhub.com")) {
+        opts.domain = ".sidepitchhub.com";
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return opts;
 }

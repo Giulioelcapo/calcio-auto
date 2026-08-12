@@ -8,7 +8,8 @@ import {
 } from "@/lib/blog";
 import { isRedisConfigured, redisCommand } from "@/lib/redis-rest";
 
-const REDIS_HASH = "sidepitchhub:blog:posts";
+/** Un solo chiave JSON (GET/SET) — come i poll: i token Upstash free spesso non permettono HASH. */
+const REDIS_KEY = "sidepitchhub:blog:posts-map";
 const LOCAL_FILE = path.join(process.cwd(), "data", "blog-posts.json");
 
 function slugify(input: string): string {
@@ -78,6 +79,10 @@ export function parseBodyFromText(raw: string): BlogBlock[] {
   }
   flushList();
   flushPara();
+
+  if (!blocks.length && raw.trim()) {
+    blocks.push({ type: "p", text: raw.trim() });
+  }
   return blocks;
 }
 
@@ -92,7 +97,7 @@ export function serializeBodyToText(body: BlogBlock[]): string {
     }
     parts.push("");
   }
-  return parts.join("\n").trim() + "\n";
+  return `${parts.join("\n").trim()}\n`;
 }
 
 function isCategory(v: unknown): v is BlogCategory {
@@ -104,7 +109,9 @@ function isCategory(v: unknown): v is BlogCategory {
   );
 }
 
-export function normalizePost(input: Partial<BlogPost> & { title: string }): BlogPost {
+export function normalizePost(
+  input: Partial<BlogPost> & { title: string },
+): BlogPost {
   const slug = ensureSlug(input.title, input.slug);
   const body = Array.isArray(input.body) ? input.body : [];
   return {
@@ -134,32 +141,36 @@ async function readLocalStore(): Promise<Record<string, BlogPost>> {
 }
 
 async function writeLocalStore(map: Record<string, BlogPost>) {
+  if (process.env.VERCEL) {
+    throw new Error(
+      "Su Vercel serve Upstash Redis (UPSTASH_REDIS_REST_URL / TOKEN).",
+    );
+  }
   await fs.mkdir(path.dirname(LOCAL_FILE), { recursive: true });
   await fs.writeFile(LOCAL_FILE, JSON.stringify(map, null, 2), "utf8");
 }
 
 async function readRedisStore(): Promise<Record<string, BlogPost>> {
-  const result = await redisCommand(["HGETALL", REDIS_HASH]);
-  const map: Record<string, BlogPost> = {};
-  if (!Array.isArray(result)) return map;
-  for (let i = 0; i < result.length; i += 2) {
-    const slug = String(result[i] ?? "");
-    const json = String(result[i + 1] ?? "");
-    if (!slug || !json) continue;
-    try {
-      map[slug] = JSON.parse(json) as BlogPost;
-    } catch {
-      // skip
-    }
+  const raw = await redisCommand(["GET", REDIS_KEY]);
+  if (typeof raw !== "string" || !raw) return {};
+  try {
+    const data = JSON.parse(raw) as Record<string, BlogPost>;
+    return data && typeof data === "object" && !Array.isArray(data) ? data : {};
+  } catch {
+    return {};
   }
-  return map;
+}
+
+async function writeRedisStore(map: Record<string, BlogPost>) {
+  await redisCommand(["SET", REDIS_KEY, JSON.stringify(map)]);
 }
 
 async function readDynamicStore(): Promise<Record<string, BlogPost>> {
   if (isRedisConfigured()) {
     try {
       return await readRedisStore();
-    } catch {
+    } catch (err) {
+      if (process.env.VERCEL) throw err;
       return readLocalStore();
     }
   }
@@ -203,13 +214,16 @@ export async function saveBlogPost(post: BlogPost): Promise<BlogPost> {
   });
 
   if (isRedisConfigured()) {
-    await redisCommand([
-      "HSET",
-      REDIS_HASH,
-      normalized.slug,
-      JSON.stringify(normalized),
-    ]);
+    const map = await readRedisStore();
+    map[normalized.slug] = normalized;
+    await writeRedisStore(map);
     return normalized;
+  }
+
+  if (process.env.VERCEL) {
+    throw new Error(
+      "Redis non configurato su Vercel: aggiungi UPSTASH_REDIS_REST_URL e TOKEN.",
+    );
   }
 
   const map = await readLocalStore();
@@ -220,8 +234,14 @@ export async function saveBlogPost(post: BlogPost): Promise<BlogPost> {
 
 export async function deleteBlogPost(slug: string): Promise<boolean> {
   if (isRedisConfigured()) {
-    const n = await redisCommand(["HDEL", REDIS_HASH, slug]);
-    return Number(n) > 0;
+    const map = await readRedisStore();
+    if (!(slug in map)) return false;
+    delete map[slug];
+    await writeRedisStore(map);
+    return true;
+  }
+  if (process.env.VERCEL) {
+    throw new Error("Redis non configurato su Vercel.");
   }
   const map = await readLocalStore();
   if (!(slug in map)) return false;

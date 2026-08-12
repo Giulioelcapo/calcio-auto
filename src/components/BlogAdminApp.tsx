@@ -111,39 +111,51 @@ export function BlogAdminApp() {
     setError(null);
     setMessage(null);
     startTransition(async () => {
-      const res = await fetch("/api/blog", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          slug: form.slug || undefined,
-          title: form.title,
-          description: form.description,
-          date: form.date,
-          author: form.author,
-          category: form.category,
-          tags: form.tags
-            .split(",")
-            .map((t) => t.trim())
-            .filter(Boolean),
-          draft: form.draft,
-          bodyText: form.bodyText,
-        }),
-      });
-      const data = (await res.json().catch(() => null)) as {
-        error?: string;
-        post?: AdminPost;
-      } | null;
-      if (!res.ok) {
-        setError(data?.error || "Salvataggio fallito");
-        return;
+      try {
+        const res = await fetch("/api/blog", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            slug: form.slug || undefined,
+            title: form.title,
+            description: form.description,
+            date: form.date,
+            author: form.author,
+            category: form.category,
+            tags: form.tags
+              .split(",")
+              .map((t) => t.trim())
+              .filter(Boolean),
+            draft: form.draft,
+            bodyText: form.bodyText,
+          }),
+        });
+        const data = (await res.json().catch(() => null)) as {
+          error?: string;
+          post?: AdminPost;
+        } | null;
+        if (!res.ok) {
+          setError(
+            data?.error ||
+              `Salvataggio fallito (HTTP ${res.status}). Rieffettua il login e riprova.`,
+          );
+          if (res.status === 401) setAuthed(false);
+          return;
+        }
+        setMessage(
+          form.draft
+            ? "Bozza salvata (non pubblica)."
+            : "Articolo salvato e online.",
+        );
+        if (data?.post) setForm(postToForm(data.post));
+        await loadPosts();
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Errore di rete durante il salvataggio",
+        );
       }
-      setMessage(
-        form.draft
-          ? "Bozza salvata (non pubblica)."
-          : "Articolo salvato e online.",
-      );
-      if (data?.post) setForm(postToForm(data.post));
-      await loadPosts();
     });
   }
 
