@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AdSlot } from "@/components/AdSlot";
 import { BlogPostCard } from "@/components/Blog";
-import { listBlogPosts } from "@/lib/blog";
+import { listAllBlogPosts } from "@/lib/blog-store";
 import { SITE_NAME } from "@/lib/site";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Blog calcio: analisi, performance e osservatori",
@@ -18,8 +20,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/blog" },
 };
 
-export default function BlogIndexPage() {
-  const posts = listBlogPosts();
+export default async function BlogIndexPage() {
+  const posts = await listAllBlogPosts();
 
   return (
     <div className="space-y-8">
@@ -60,8 +62,10 @@ export default function BlogIndexPage() {
         </div>
       ) : (
         <p className="text-sm text-[var(--muted)]">
-          Nessun articolo pubblicato. Aggiungi un post in{" "}
-          <code className="data-font text-[var(--accent)]">src/lib/blog.ts</code>
+          Nessun articolo pubblicato. Scrivi da{" "}
+          <Link href="/admin/blog" className="text-[var(--accent)] hover:underline">
+            /admin/blog
+          </Link>
           .
         </p>
       )}

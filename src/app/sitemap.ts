@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next";
-import { listBlogPosts } from "@/lib/blog";
+import { listAllBlogPosts } from "@/lib/blog-store";
 import { LEAGUE_SECTIONS, LEAGUES } from "@/lib/leagues";
 import { siteUrl } from "@/lib/site";
 
 const LEGAL = ["privacy", "cookie", "contatti", "chi-siamo", "guida"] as const;
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
   const now = new Date();
   const entries: MetadataRoute.Sitemap = [
@@ -66,7 +66,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  for (const post of listBlogPosts()) {
+  for (const post of await listAllBlogPosts()) {
     entries.push({
       url: `${base}/blog/${post.slug}`,
       lastModified: new Date(post.updated ?? post.date),

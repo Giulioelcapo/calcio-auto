@@ -23,10 +23,12 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: ["/", "/ads.txt", "/llms.txt"],
+        disallow: ["/admin", "/api/blog"],
       },
       {
         userAgent: "Googlebot",
         allow: ["/", "/ads.txt", "/llms.txt"],
+        disallow: ["/admin", "/api/blog"],
       },
       {
         userAgent: "Mediapartners-Google",

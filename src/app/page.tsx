@@ -8,7 +8,7 @@ import { OsservatoriSection } from "@/components/OsservatoriSection";
 import { PartnerOffers } from "@/components/PartnerOffers";
 import { PollPanel } from "@/components/PollPanel";
 import { RankingsSection } from "@/components/RankingsSection";
-import { listBlogPosts } from "@/lib/blog";
+import { listAllBlogPosts } from "@/lib/blog-store";
 import {
   getFreeDeskReport,
   getHomeRankings,
@@ -27,7 +27,7 @@ export const metadata = homeMetadata();
 
 export default async function HomePage() {
   const leagues = listLeagues();
-  const [news, poll, today, rankings, osservatori, freeDesk] =
+  const [news, poll, today, rankings, osservatori, freeDesk, allBlog] =
     await Promise.all([
       getFootballNews(8),
       getServerPollState(),
@@ -35,8 +35,9 @@ export default async function HomePage() {
       getHomeRankings(),
       getOsservatoriReport(),
       getFreeDeskReport(),
+      listAllBlogPosts(),
     ]);
-  const blogPosts = listBlogPosts().slice(0, 2);
+  const blogPosts = allBlog.slice(0, 2);
   const hasMatchesToday = today.matches.length > 0;
   const featured = news[0];
   const sideNews = news.slice(1, 4);

@@ -4,24 +4,20 @@ import { notFound } from "next/navigation";
 import { AdSlot } from "@/components/AdSlot";
 import { BlogArticleBody } from "@/components/Blog";
 import { JsonLd } from "@/components/JsonLd";
+import { BLOG_CATEGORIES, formatBlogDate } from "@/lib/blog";
 import {
-  BLOG_CATEGORIES,
-  formatBlogDate,
-  getBlogPost,
-  getBlogSlugs,
-  listBlogPosts,
-} from "@/lib/blog";
+  getBlogPostBySlug,
+  listAllBlogPosts,
+} from "@/lib/blog-store";
 import { SITE_NAME, siteUrl } from "@/lib/site";
+
+export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return getBlogSlugs().map((slug) => ({ slug }));
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = getBlogPost(slug);
+  const post = await getBlogPostBySlug(slug);
   if (!post) return { title: "Articolo" };
   return {
     title: post.title,
@@ -43,12 +39,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogArticlePage({ params }: Props) {
   const { slug } = await params;
-  const post = getBlogPost(slug);
+  const post = await getBlogPostBySlug(slug);
   if (!post) notFound();
 
   const base = siteUrl();
   const url = `${base}/blog/${post.slug}`;
-  const related = listBlogPosts()
+  const related = (await listAllBlogPosts())
     .filter((p) => p.slug !== post.slug)
     .slice(0, 3);
 
