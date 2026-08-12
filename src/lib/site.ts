@@ -95,6 +95,6 @@ export const SITE_TAGLINE = "Classifiche, news e dati calcio automatici";
 export function contactEmail(): string {
   return (
     process.env["NEXT_PUBLIC_CONTACT_EMAIL"]?.trim() ||
-    "info@sidepitchhub.local"
+    "info@sidepitchhub.com"
   );
 }
