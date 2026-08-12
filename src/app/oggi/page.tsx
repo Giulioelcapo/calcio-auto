@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AdSlot } from "@/components/AdSlot";
+import { AmazonShopRail } from "@/components/AmazonShopRail";
 import { Crest } from "@/components/Crest";
 import { MockBanner } from "@/components/LeagueNav";
 import { getTodaysMatches } from "@/lib/football-api";
