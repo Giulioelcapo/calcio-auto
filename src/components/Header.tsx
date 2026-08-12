@@ -3,7 +3,7 @@ import { CalcioAutoLogo } from "@/components/CalcioAutoLogo";
 import { NewsTicker } from "@/components/NewsTicker";
 import { LEAGUES } from "@/lib/leagues";
 import { getFootballNews } from "@/lib/news";
-import { SITE_NAME } from "@/lib/site";
+import { SITE_NAME, xProfileUrl } from "@/lib/site";
 
 export async function Header() {
   const news = await getFootballNews(8);
@@ -96,6 +96,7 @@ export async function Header() {
 }
 
 export function Footer() {
+  const xUrl = xProfileUrl();
   return (
     <footer className="mt-auto border-t border-[var(--line)] bg-black py-10 text-sm text-[var(--muted)]">
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 sm:flex-row sm:items-start sm:justify-between">
@@ -109,6 +110,18 @@ export function Footer() {
               Classifiche, calendari, risultati e notizie aggiornati in
               automatico · Dati football-data.org
             </p>
+            {xUrl ? (
+              <p className="pt-1 text-xs">
+                <a
+                  href={xUrl}
+                  target="_blank"
+                  rel="noopener noreferrer me"
+                  className="font-semibold text-[var(--accent)] hover:text-[var(--ink)]"
+                >
+                  Seguici su X
+                </a>
+              </p>
+            ) : null}
           </div>
         </div>
         <nav className="flex flex-wrap gap-x-4 gap-y-2 text-xs uppercase tracking-[0.12em]">
@@ -139,6 +152,16 @@ export function Footer() {
           <Link href="/guida" className="hover:text-[var(--accent)]">
             Guida
           </Link>
+          {xUrl ? (
+            <a
+              href={xUrl}
+              target="_blank"
+              rel="noopener noreferrer me"
+              className="hover:text-[var(--accent)]"
+            >
+              X
+            </a>
+          ) : null}
           <Link href="/chi-siamo" className="hover:text-[var(--accent)]">
             Chi siamo
           </Link>

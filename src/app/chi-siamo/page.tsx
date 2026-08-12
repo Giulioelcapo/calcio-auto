@@ -4,7 +4,7 @@ import { FaqSection } from "@/components/FaqSection";
 import { LegalPage } from "@/components/LegalPage";
 import { siteFaqs } from "@/lib/geo";
 import { SEASON_LABEL } from "@/lib/season";
-import { SITE_NAME, SITE_TAGLINE, siteUrl } from "@/lib/site";
+import { SITE_NAME, SITE_TAGLINE, siteUrl, xProfileUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Chi siamo",
@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 
 export default function ChiSiamoPage() {
   const base = siteUrl();
+  const xUrl = xProfileUrl();
   return (
     <LegalPage title="Chi siamo" updated="12 agosto 2026">
       <p>
@@ -20,6 +21,16 @@ export default function ChiSiamoPage() {
         {SITE_NAME}. Contatto:{" "}
         <a href="mailto:info@sidepitchhub.com">info@sidepitchhub.com</a>. URL
         canonico: {base}.
+        {xUrl ? (
+          <>
+            {" "}
+            Aggiornamenti su X:{" "}
+            <a href={xUrl} target="_blank" rel="noopener noreferrer me">
+              {xUrl.replace(/^https?:\/\//, "")}
+            </a>
+            .
+          </>
+        ) : null}
       </p>
 
       <h2>Cosa pubblichiamo</h2>

@@ -1,4 +1,10 @@
-import { SITE_NAME, SITE_TAGLINE, contactEmail, siteUrl } from "@/lib/site";
+import {
+  SITE_NAME,
+  SITE_TAGLINE,
+  contactEmail,
+  siteUrl,
+  xProfileUrl,
+} from "@/lib/site";
 import { LEAGUES } from "@/lib/leagues";
 import { SEASON_LABEL } from "@/lib/season";
 import type { CompetitionBundle } from "@/lib/types";
@@ -22,6 +28,7 @@ export function geoUpdatedAt(date = new Date()): string {
 
 export function organizationJsonLd() {
   const base = siteUrl();
+  const x = xProfileUrl();
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -30,7 +37,7 @@ export function organizationJsonLd() {
     description: SITE_TAGLINE,
     email: contactEmail(),
     logo: `${base}/logo-sp.png`,
-    sameAs: [base],
+    sameAs: x ? [base, x] : [base],
   };
 }
 

@@ -111,3 +111,19 @@ export function contactEmail(): string {
     "info@sidepitchhub.com"
   );
 }
+
+/** Handle X senza @ (es. sidepitchhub). */
+export function xHandle(): string | undefined {
+  const fromEnv = process.env["NEXT_PUBLIC_X_HANDLE"]?.trim().replace(/^@/, "");
+  if (fromEnv) return fromEnv;
+  return undefined;
+}
+
+/** Profilo X pubblico, se configurato. */
+export function xProfileUrl(): string | undefined {
+  const explicit = process.env["NEXT_PUBLIC_X_URL"]?.trim().replace(/\/$/, "");
+  if (explicit) return explicit;
+  const handle = xHandle();
+  if (!handle) return undefined;
+  return `https://x.com/${handle}`;
+}
