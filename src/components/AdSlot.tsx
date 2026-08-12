@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { AmazonProductImage } from "@/components/AmazonProductImage";
 import {
   adsenseClient,
   adsenseSlot,
@@ -36,20 +36,18 @@ function PartnerBanner({
   const inner = isSide ? (
     <div className="flex h-full flex-col">
       {partner.imageSrc ? (
-        <div className="relative h-36 shrink-0 overflow-hidden bg-[var(--panel-2)]">
-          <Image
+        <div className="relative h-40 shrink-0 overflow-hidden bg-white">
+          <AmazonProductImage
             src={partner.imageSrc}
             alt={partner.imageAlt || partner.title}
-            fill
             sizes="320px"
-            className="object-cover"
           />
         </div>
       ) : null}
       <div className="flex flex-1 flex-col justify-between gap-3 px-4 py-3">
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
-            Partner · Affiliate
+            Amazon · Prodotto reale
           </p>
           <p className="mt-1 text-sm font-semibold text-[var(--ink)]">
             {partner.title}
@@ -64,20 +62,18 @@ function PartnerBanner({
   ) : (
     <div className="flex h-full min-h-[88px] items-stretch">
       {partner.imageSrc ? (
-        <div className="relative w-28 shrink-0 overflow-hidden sm:w-40">
-          <Image
+        <div className="relative w-28 shrink-0 overflow-hidden bg-white sm:w-36">
+          <AmazonProductImage
             src={partner.imageSrc}
             alt={partner.imageAlt || partner.title}
-            fill
             sizes="160px"
-            className="object-cover"
           />
         </div>
       ) : null}
       <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3 px-4 py-3">
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
-            Partner · Affiliate
+            Amazon · Prodotto reale
           </p>
           <p className="mt-1 truncate text-sm font-semibold text-[var(--ink)] sm:text-base">
             {partner.title}
