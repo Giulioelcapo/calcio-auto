@@ -12,6 +12,7 @@ import { getCompetitionBundle } from "@/lib/football-api";
 import { sportsLeagueJsonLd, standingsFaqs } from "@/lib/geo";
 import { getAllLeagueSlugs } from "@/lib/leagues";
 import { SEASON_LABEL } from "@/lib/season";
+import { classificaMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -26,10 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { league: slug } = await params;
   const data = await getCompetitionBundle(slug);
   if (!data) return { title: "Classifica" };
-  return {
-    title: `Classifica ${data.league.name} ${SEASON_LABEL} aggiornata`,
-    description: standingsIntro(data),
-  };
+  return classificaMetadata(data);
 }
 
 export default async function ClassificaPage({ params }: Props) {
@@ -70,10 +68,10 @@ export default async function ClassificaPage({ params }: Props) {
           />
           <div>
             <h1 className="text-3xl font-bold">
-              Classifica {data.league.name}
+              Classifica {data.league.name} {data.seasonLabel || SEASON_LABEL}
             </h1>
             <p className="text-sm text-[var(--muted)]">
-              Stagione {data.seasonLabel || SEASON_LABEL}
+              Tabella aggiornata
               {data.matchday ? ` · Giornata ${data.matchday}` : ""}
               {data.meta.startDate
                 ? ` · ${data.meta.startDate} → ${data.meta.endDate ?? "?"}`

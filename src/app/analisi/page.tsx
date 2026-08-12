@@ -4,16 +4,12 @@ import { AdSlot } from "@/components/AdSlot";
 import { FreeDeskSection } from "@/components/FreeDeskSection";
 import { getFreeDeskReport, listLeagues } from "@/lib/football-api";
 import { getLeagueNews } from "@/lib/news";
-import { SITE_NAME } from "@/lib/site";
+import { analisiMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export const metadata: Metadata = {
-  title: "Analisi free",
-  description: `Streak, difficoltà calendario, prossima giornata e meteo free su ${SITE_NAME}.`,
-  alternates: { canonical: "/analisi" },
-};
+export const metadata: Metadata = analisiMetadata();
 
 export default async function AnalisiPage() {
   const [report, ...leagueNews] = await Promise.all([
@@ -30,7 +26,7 @@ export default async function AnalisiPage() {
   return (
     <div className="space-y-8">
       <h1 className="display-font text-4xl font-bold uppercase tracking-tight sm:text-5xl">
-        Analisi
+        Analisi calcio
       </h1>
       <AdSlot slot="top" />
       <FreeDeskSection report={report} />

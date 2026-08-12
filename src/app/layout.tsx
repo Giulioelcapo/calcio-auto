@@ -12,6 +12,7 @@ import {
   googleSiteVerification,
   siteUrl,
 } from "@/lib/site";
+import { SEASON_LABEL } from "@/lib/season";
 import "./globals.css";
 
 const display = Oswald({
@@ -38,13 +39,20 @@ const adsense = adsenseClient();
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    default: `Classifiche calcio e partite di oggi ${SEASON_LABEL} | ${SITE_NAME}`,
     template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "Hub SEO di calcio aggiornato in automatico: classifiche, calendari, risultati e insight sui 12 campionati free di football-data.org.",
+  description: `Classifica Serie A, Premier League e campionati ${SEASON_LABEL}: partite di oggi, risultati, calendari e marcatori aggiornati. Hub calcio ${SITE_NAME}.`,
+  keywords: [
+    "partite di oggi",
+    "classifica serie a",
+    "classifica premier league",
+    "calendario serie a",
+    "risultati calcio",
+    SITE_NAME,
+  ],
   openGraph: {
-    title: SITE_NAME,
+    title: `${SITE_NAME} — classifiche e partite di oggi`,
     description: SITE_TAGLINE,
     type: "website",
     locale: "it_IT",

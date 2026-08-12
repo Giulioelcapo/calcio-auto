@@ -6,16 +6,12 @@ import {
   getMultiLeagueScorers,
   getTodaysMatches,
 } from "@/lib/football-api";
-import { SITE_NAME } from "@/lib/site";
+import { golMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export const metadata: Metadata = {
-  title: "Gol e marcatori ufficiali",
-  description: `Gol e marcatori precisi su ${SITE_NAME}: risultati di oggi e top scorer multi-lega solo da API ufficiale.`,
-  alternates: { canonical: "/gol" },
-};
+export const metadata: Metadata = golMetadata();
 
 export default async function GolPage() {
   const today = await getTodaysMatches();
@@ -38,7 +34,7 @@ export default async function GolPage() {
           Dati ufficiali
         </p>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          Gol e marcatori
+          Gol e marcatori calcio oggi
         </h1>
         <p className="max-w-2xl text-sm text-[var(--muted)]">
           {today.dateLabel}. Risultati ufficiali di oggi + marcatori di più

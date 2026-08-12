@@ -14,6 +14,7 @@ import {
   getTeamPage,
 } from "@/lib/football-api";
 import { getAllLeagueSlugs } from "@/lib/leagues";
+import { teamMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -35,10 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { league, team } = await params;
   const data = await getTeamPage(league, team);
   if (!data) return { title: "Squadra" };
-  return {
-    title: `${data.team.name} — ${data.league.name}`,
-    description: teamIntro(data),
-  };
+  return teamMetadata(data);
 }
 
 export default async function SquadraPage({ params }: Props) {

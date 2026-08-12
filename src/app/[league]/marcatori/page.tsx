@@ -6,6 +6,7 @@ import { ContentBlock, LeagueNav, MockBanner } from "@/components/LeagueNav";
 import { scorersAnalysis, scorersIntro } from "@/lib/content-templates";
 import { getCompetitionBundle } from "@/lib/football-api";
 import { getAllLeagueSlugs } from "@/lib/leagues";
+import { marcatoriMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -19,10 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { league: slug } = await params;
   const data = await getCompetitionBundle(slug);
   if (!data) return { title: "Marcatori" };
-  return {
-    title: `Marcatori ${data.league.name}`,
-    description: scorersIntro(data),
-  };
+  return marcatoriMetadata(data);
 }
 
 export default async function MarcatoriPage({ params }: Props) {
@@ -33,7 +31,9 @@ export default async function MarcatoriPage({ params }: Props) {
   return (
     <div className="space-y-6">
       <MockBanner usingMock={data.usingMock} />
-      <h1 className="text-3xl font-bold">Marcatori {data.league.name}</h1>
+      <h1 className="text-3xl font-bold">
+        Marcatori {data.league.name} {data.seasonLabel}
+      </h1>
       <LeagueNav slug={slug} />
       <AdSlot slot="top" />
       <ContentBlock>{scorersIntro(data)}</ContentBlock>

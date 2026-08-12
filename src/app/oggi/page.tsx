@@ -1,24 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AdSlot } from "@/components/AdSlot";
-import { AmazonShopRail } from "@/components/AmazonShopRail";
 import { AiAnswerBlock } from "@/components/AiAnswerBlock";
+import { AmazonShopRail } from "@/components/AmazonShopRail";
 import { Crest } from "@/components/Crest";
 import { FaqSection } from "@/components/FaqSection";
 import { MockBanner } from "@/components/LeagueNav";
 import { getTodaysMatches } from "@/lib/football-api";
 import { geoUpdatedAt, todayFaqs } from "@/lib/geo";
+import { oggiMetadata } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 import type { TodayMatch } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export const metadata: Metadata = {
-  title: "Partite di oggi",
-  description: `Calendario partite di calcio di oggi: orari e risultati live su ${SITE_NAME}, tutti i campionati free aggiornati in automatico.`,
-  alternates: { canonical: "/oggi" },
-};
+export const metadata: Metadata = oggiMetadata();
 
 function formatKickoff(iso: string) {
   return new Date(iso).toLocaleTimeString("it-IT", {
@@ -97,12 +94,11 @@ export default async function OggiPage() {
           Agenda giornaliera
         </p>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          Partite di oggi
+          Partite di calcio di oggi
         </h1>
         <p className="max-w-2xl text-sm text-[var(--muted)]">
-          {data.dateLabel} · orari Europa/Roma · aggiornamento automatico su
-          Premier League, Serie A, Liga, Bundesliga, Ligue 1 e gli altri
-          campionati free.
+          Orari e risultati live · Europa/Roma · Serie A, Premier League, Liga,
+          Bundesliga, Ligue 1 e altri campionati
         </p>
       </section>
 

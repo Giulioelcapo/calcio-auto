@@ -13,6 +13,7 @@ import { getCompetitionBundle, getLeagueFreeBundle } from "@/lib/football-api";
 import { leagueFaqs, sportsLeagueJsonLd } from "@/lib/geo";
 import { getAllLeagueSlugs } from "@/lib/leagues";
 import { getLeagueNews } from "@/lib/news";
+import { leagueHubMetadata } from "@/lib/seo";
 import { Crest } from "@/components/Crest";
 import { teamPathSlug } from "@/lib/slug";
 
@@ -29,10 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { league: slug } = await params;
   const data = await getCompetitionBundle(slug);
   if (!data) return { title: "Campionato non trovato" };
-  return {
-    title: `${data.league.name} — hub classifica e calendario`,
-    description: leagueHubIntro(data),
-  };
+  return leagueHubMetadata(data);
 }
 
 const LINKS = [
@@ -65,7 +63,9 @@ export default async function LeagueHubPage({ params }: Props) {
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
           {data.league.country} · {data.seasonLabel}
         </p>
-        <h1 className="text-3xl font-bold">{data.league.name}</h1>
+        <h1 className="text-3xl font-bold">
+          {data.league.name} {data.seasonLabel}: classifica e calendario
+        </h1>
         {next ? (
           <p className="text-sm text-[var(--muted)]">
             Giornata {next.matchday} · {next.matchCount} gare

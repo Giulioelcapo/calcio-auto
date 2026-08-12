@@ -9,7 +9,7 @@ import {
   getCompetitionBundle,
 } from "@/lib/football-api";
 import { getAllLeagueSlugs } from "@/lib/leagues";
-import { SEASON_LABEL } from "@/lib/season";
+import { risultatiMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -23,10 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { league: slug } = await params;
   const data = await getCompetitionBundle(slug);
   if (!data) return { title: "Risultati" };
-  return {
-    title: `Risultati ${data.league.name} ${SEASON_LABEL}`,
-    description: resultsIntro(data),
-  };
+  return risultatiMetadata(data);
 }
 
 export default async function RisultatiPage({ params }: Props) {
@@ -39,7 +36,7 @@ export default async function RisultatiPage({ params }: Props) {
     <div className="space-y-6">
       <MockBanner usingMock={data.usingMock} />
       <h1 className="text-3xl font-bold">
-        Risultati {data.league.name} {SEASON_LABEL}
+        Risultati {data.league.name} {data.seasonLabel}
       </h1>
       <LeagueNav slug={slug} />
       <AdSlot slot="top" />
@@ -49,7 +46,7 @@ export default async function RisultatiPage({ params }: Props) {
           <MatchesList matches={results} />
         ) : (
           <div className="panel rounded-md p-6 text-sm text-[var(--muted)]">
-            Nessun risultato ancora: la stagione {SEASON_LABEL} non è partita (o
+            Nessun risultato ancora: la stagione {data.seasonLabel} non è partita (o
             non ci sono partite finite). Controlla il{" "}
             <a
               href={`/${slug}/calendario`}

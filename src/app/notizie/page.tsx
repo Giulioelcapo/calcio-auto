@@ -2,16 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AdSlot } from "@/components/AdSlot";
 import { getFootballNews } from "@/lib/news";
+import { notizieMetadata } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export const metadata: Metadata = {
-  title: "Notizie calcio e mercato",
-  description: `Ultime notizie di calcio e mercato in italiano su ${SITE_NAME}: titoli aggiornati con link alle fonti originali.`,
-  alternates: { canonical: "/notizie" },
-};
+export const metadata: Metadata = notizieMetadata();
 
 function formatWhen(value: string | null) {
   if (!value) return null;
@@ -37,10 +34,10 @@ export default async function NotiziePage() {
           Aggregatore
         </p>
         <h1 className="display-font text-4xl font-bold uppercase tracking-tight sm:text-5xl">
-          Notizie calcio e mercato
+          Notizie calcio oggi
         </h1>
         <p className="max-w-2xl text-sm text-[var(--muted)]">
-          Titoli aggiornati automaticamente. Solo headline e link alle fonti
+          Ultime news e mercato: titoli aggiornati con link alle fonti
           originali.
         </p>
       </section>

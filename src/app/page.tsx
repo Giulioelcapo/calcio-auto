@@ -17,8 +17,11 @@ import {
 import { siteFaqs } from "@/lib/geo";
 import { getFootballNews } from "@/lib/news";
 import { getServerPollState } from "@/lib/poll-server";
+import { homeMetadata } from "@/lib/seo";
+import { SEASON_LABEL } from "@/lib/season";
 
 export const dynamic = "force-dynamic";
+export const metadata = homeMetadata();
 
 export default async function HomePage() {
   const leagues = listLeagues();
@@ -52,11 +55,11 @@ export default async function HomePage() {
         <div className="hero-pitch-shade" />
         <div className="hero-pitch-content px-5 py-10 sm:px-8 sm:py-14">
           <h1 className="display-font max-w-3xl text-3xl font-bold uppercase leading-tight tracking-tight text-[var(--ink)] sm:text-5xl">
-            12 campionati. News, dati, statistiche.
+            Classifiche calcio e partite di oggi {SEASON_LABEL}
           </h1>
           <p className="mt-3 max-w-xl text-sm text-[var(--muted)] sm:text-base">
-            Partite di oggi, sondaggio community, classifiche e calendari in un
-            solo hub.
+            Classifica Serie A, Premier League, calendari, risultati e
+            osservatori in un solo hub.
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
             <Link
