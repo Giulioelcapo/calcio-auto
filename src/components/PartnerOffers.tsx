@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   AFFILIATE_OFFERS,
@@ -28,18 +29,29 @@ export function PartnerOffers({ compact = false }: { compact?: boolean }) {
             href={offerHref(offer)}
             target="_blank"
             rel="noopener noreferrer sponsored"
-            className="panel block p-4 transition hover:border-[var(--accent)]"
+            className="panel group block overflow-hidden transition hover:border-[var(--accent)]"
           >
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
-              Affiliate
-            </p>
-            <h3 className="display-font mt-2 text-lg font-bold uppercase leading-tight">
-              {offer.title}
-            </h3>
-            <p className="mt-1 text-xs text-[var(--muted)]">{offer.subtitle}</p>
-            <span className="mt-3 inline-block text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
-              {offer.cta} →
-            </span>
+            <div className="relative aspect-[16/10] overflow-hidden bg-[var(--panel-2)]">
+              <Image
+                src={offer.imageSrc}
+                alt={offer.imageAlt}
+                fill
+                sizes="(max-width: 640px) 100vw, 33vw"
+                className="object-cover transition duration-500 group-hover:scale-[1.04]"
+              />
+            </div>
+            <div className="p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
+                Affiliate · Amazon
+              </p>
+              <h3 className="display-font mt-2 text-lg font-bold uppercase leading-tight">
+                {offer.title}
+              </h3>
+              <p className="mt-1 text-xs text-[var(--muted)]">{offer.subtitle}</p>
+              <span className="mt-3 inline-block text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--accent)]">
+                {offer.cta} →
+              </span>
+            </div>
           </a>
         ))}
       </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -30,28 +31,69 @@ function PartnerBanner({
   className: string;
 }) {
   const partner = partnerSlot(slot);
-  const minH = slot === "side" ? "min-h-[140px]" : "min-h-[88px]";
+  const isSide = slot === "side";
 
-  const inner = (
-    <div className="flex h-full flex-wrap items-center justify-between gap-3 px-4 py-3">
-      <div className="min-w-0">
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
-          Partner · Affiliate
-        </p>
-        <p className="mt-1 truncate text-sm font-semibold text-[var(--ink)] sm:text-base">
-          {partner.title}
-        </p>
-        <p className="text-xs text-[var(--muted)]">{partner.subtitle}</p>
+  const inner = isSide ? (
+    <div className="flex h-full flex-col">
+      {partner.imageSrc ? (
+        <div className="relative h-36 shrink-0 overflow-hidden bg-[var(--panel-2)]">
+          <Image
+            src={partner.imageSrc}
+            alt={partner.imageAlt || partner.title}
+            fill
+            sizes="320px"
+            className="object-cover"
+          />
+        </div>
+      ) : null}
+      <div className="flex flex-1 flex-col justify-between gap-3 px-4 py-3">
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+            Partner · Affiliate
+          </p>
+          <p className="mt-1 text-sm font-semibold text-[var(--ink)]">
+            {partner.title}
+          </p>
+          <p className="text-xs text-[var(--muted)]">{partner.subtitle}</p>
+        </div>
+        <span className="btn-accent inline-flex w-fit px-3 py-1.5 text-xs uppercase tracking-[0.12em]">
+          {partner.cta}
+        </span>
       </div>
-      <span className="btn-accent shrink-0 px-3 py-1.5 text-xs uppercase tracking-[0.12em]">
-        {partner.cta}
-      </span>
+    </div>
+  ) : (
+    <div className="flex h-full min-h-[88px] items-stretch">
+      {partner.imageSrc ? (
+        <div className="relative w-28 shrink-0 overflow-hidden sm:w-40">
+          <Image
+            src={partner.imageSrc}
+            alt={partner.imageAlt || partner.title}
+            fill
+            sizes="160px"
+            className="object-cover"
+          />
+        </div>
+      ) : null}
+      <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3 px-4 py-3">
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+            Partner · Affiliate
+          </p>
+          <p className="mt-1 truncate text-sm font-semibold text-[var(--ink)] sm:text-base">
+            {partner.title}
+          </p>
+          <p className="text-xs text-[var(--muted)]">{partner.subtitle}</p>
+        </div>
+        <span className="btn-accent shrink-0 px-3 py-1.5 text-xs uppercase tracking-[0.12em]">
+          {partner.cta}
+        </span>
+      </div>
     </div>
   );
 
   return (
     <aside
-      className={`panel overflow-hidden ${minH} ${className}`}
+      className={`panel overflow-hidden ${className}`}
       aria-label={`Spazio partner ${slot}`}
     >
       {partner.external ? (

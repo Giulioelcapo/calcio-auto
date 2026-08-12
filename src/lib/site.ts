@@ -48,6 +48,8 @@ export type PartnerSlotConfig = {
   subtitle: string;
   cta: string;
   external: boolean;
+  imageSrc?: string;
+  imageAlt?: string;
 };
 
 /** Banner partner / affiliate (funziona senza AdSense). */
@@ -69,6 +71,7 @@ export function partnerSlot(kind: PartnerSlotKind): PartnerSlotConfig {
 
   const href = map[kind].href?.trim();
   const title = map[kind].title?.trim();
+  const offer = offerBySlot(kind);
 
   if (href) {
     return {
@@ -77,17 +80,20 @@ export function partnerSlot(kind: PartnerSlotKind): PartnerSlotConfig {
       subtitle: "Offerta consigliata · apre in una nuova scheda",
       cta: "Scopri",
       external: /^https?:\/\//i.test(href),
+      imageSrc: offer.imageSrc,
+      imageAlt: offer.imageAlt,
     };
   }
 
   // Default: offerte Amazon (commissioni se NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG è set)
-  const offer = offerBySlot(kind);
   return {
     href: offerHref(offer),
     title: offer.title,
     subtitle: offer.subtitle,
     cta: offer.cta,
     external: true,
+    imageSrc: offer.imageSrc,
+    imageAlt: offer.imageAlt,
   };
 }
 

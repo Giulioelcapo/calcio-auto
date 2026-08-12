@@ -10,6 +10,9 @@ export type AffiliateOffer = {
   title: string;
   subtitle: string;
   cta: string;
+  /** Foto categoria (locale). Foto prodotto Amazon ufficiali → SiteStripe / PA-API. */
+  imageSrc: string;
+  imageAlt: string;
   /** Query Amazon.it */
   amazonQuery: string;
   /** Fallback se Amazon non attivo */
@@ -23,6 +26,8 @@ export const AFFILIATE_OFFERS: AffiliateOffer[] = [
     title: "Kit e maglie ufficiale",
     subtitle: "Selezione Amazon · calcio 2026",
     cta: "Vedi offerte",
+    imageSrc: "/partner/kit.jpg",
+    imageAlt: "Stadio e partita di calcio",
     amazonQuery: "maglia calcio ufficiale",
     fallbackHref: "https://www.amazon.it/s?k=maglia+calcio+ufficiale",
   },
@@ -32,6 +37,8 @@ export const AFFILIATE_OFFERS: AffiliateOffer[] = [
     title: "Palloni da match",
     subtitle: "Training e gara · prezzi aggiornati",
     cta: "Scopri",
+    imageSrc: "/partner/ball.jpg",
+    imageAlt: "Pallone da calcio su campo",
     amazonQuery: "pallone calcio professionale",
     fallbackHref: "https://www.amazon.it/s?k=pallone+calcio+professionale",
   },
@@ -41,6 +48,8 @@ export const AFFILIATE_OFFERS: AffiliateOffer[] = [
     title: "Scarpe e gear",
     subtitle: "Tacchetti e accessori per il campo",
     cta: "Apri shop",
+    imageSrc: "/partner/boots.jpg",
+    imageAlt: "Scarpe da calcio e pallone",
     amazonQuery: "scarpe calcio tacchetti",
     fallbackHref: "https://www.amazon.it/s?k=scarpe+calcio+tacchetti",
   },
