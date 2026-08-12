@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AdSlot } from "@/components/AdSlot";
 import { AmazonShopRail } from "@/components/AmazonShopRail";
+import { AiAnswerBlock } from "@/components/AiAnswerBlock";
 import { Crest } from "@/components/Crest";
+import { FaqSection } from "@/components/FaqSection";
 import { MockBanner } from "@/components/LeagueNav";
 import { getTodaysMatches } from "@/lib/football-api";
+import { geoUpdatedAt, todayFaqs } from "@/lib/geo";
 import { SITE_NAME } from "@/lib/site";
 import type { TodayMatch } from "@/lib/types";
 
@@ -80,6 +83,11 @@ export default async function OggiPage() {
   const upcoming = data.matches.filter(
     (m) => m.status !== "FINISHED" && m.status !== "AWARDED",
   );
+  const updated = geoUpdatedAt();
+  const answer =
+    data.matches.length > 0
+      ? `Oggi risultano ${data.matches.length} partite nei campionati monitorati da ${SITE_NAME} (${upcoming.length} in programma/live, ${finished.length} concluse). Orari Europe/Rome.`
+      : `Oggi non risultano partite nei 12 campionati free monitorati da ${SITE_NAME}. Controlla questa pagina per aggiornamenti automatici.`;
 
   return (
     <div className="space-y-6">
@@ -98,6 +106,8 @@ export default async function OggiPage() {
         </p>
       </section>
 
+      <AiAnswerBlock answer={answer} title="Risposta: partite di oggi" />
+
       <AdSlot slot="top" />
 
       <section className="space-y-3">
@@ -115,7 +125,7 @@ export default async function OggiPage() {
             <p className="text-sm font-medium">Campionati non ancora iniziati</p>
             <p className="text-sm text-[var(--muted)]">
               Oggi non ci sono partite tra i campionati monitorati. Torna
-              all'inizio della stagione, oppure apri i{" "}
+              all&apos;inizio della stagione, oppure apri i{" "}
               <Link href="/" className="text-[var(--accent)] hover:underline">
                 calendari
               </Link>
@@ -140,6 +150,11 @@ export default async function OggiPage() {
 
       <AdSlot slot="in-content" />
       <AmazonShopRail title="Gear per il matchday" limit={3} />
+      <FaqSection
+        items={todayFaqs(data.matches.length, updated)}
+        path="/oggi"
+        title="FAQ partite di oggi"
+      />
     </div>
   );
 }

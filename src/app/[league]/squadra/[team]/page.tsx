@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdSlot } from "@/components/AdSlot";
+import { AiAnswerBlock } from "@/components/AiAnswerBlock";
 import { AmazonContextPromo } from "@/components/AmazonContextPromo";
 import { InsightCards, MatchesList } from "@/components/DataViews";
 import { ContentBlock, LeagueNav, MockBanner } from "@/components/LeagueNav";
@@ -77,6 +78,7 @@ export default async function SquadraPage({ params }: Props) {
         ) : null}
       </div>
       <LeagueNav slug={league} />
+      <AiAnswerBlock answer={teamIntro(data)} />
       <AdSlot slot="top" />
       <AmazonContextPromo label={data.team.name} kind="team" />
       <ContentBlock>{teamIntro(data)}</ContentBlock>

@@ -3,6 +3,8 @@ import { Barlow_Condensed, Oswald, Source_Sans_3 } from "next/font/google";
 import { CookieBanner } from "@/components/CookieBanner";
 import { AmazonFooterStrip } from "@/components/AmazonFooterStrip";
 import { Footer, Header } from "@/components/Header";
+import { JsonLd } from "@/components/JsonLd";
+import { organizationJsonLd, websiteJsonLd } from "@/lib/geo";
 import {
   SITE_NAME,
   SITE_TAGLINE,
@@ -80,6 +82,7 @@ export default function RootLayout({
         ) : null}
       </head>
       <body className="flex min-h-full flex-col antialiased">
+        <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
         <Header />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:py-8">
           {children}

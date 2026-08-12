@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AdSlot } from "@/components/AdSlot";
+import { AiAnswerBlock } from "@/components/AiAnswerBlock";
 import { Crest } from "@/components/Crest";
 import { StandingsTable } from "@/components/DataViews";
+import { FaqSection } from "@/components/FaqSection";
+import { JsonLd } from "@/components/JsonLd";
 import { ContentBlock, LeagueNav, MockBanner } from "@/components/LeagueNav";
 import { standingsAnalysis, standingsIntro } from "@/lib/content-templates";
 import { getCompetitionBundle } from "@/lib/football-api";
+import { sportsLeagueJsonLd, standingsFaqs } from "@/lib/geo";
 import { getAllLeagueSlugs } from "@/lib/leagues";
 import { SEASON_LABEL } from "@/lib/season";
 
@@ -55,6 +59,7 @@ export default async function ClassificaPage({ params }: Props) {
 
   return (
     <div className="space-y-6">
+      <JsonLd data={sportsLeagueJsonLd(data)} />
       <MockBanner usingMock={data.usingMock} />
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -78,12 +83,18 @@ export default async function ClassificaPage({ params }: Props) {
         </div>
       </div>
       <LeagueNav slug={slug} />
+      <AiAnswerBlock answer={standingsIntro(data)} />
       <AdSlot slot="top" />
       <div className="grid gap-6 lg:grid-cols-[1fr_240px]">
         <div className="space-y-4">
           <ContentBlock title="Panoramica">{standingsIntro(data)}</ContentBlock>
           <StandingsTable rows={rows} leagueSlug={slug} />
           <ContentBlock title="Analisi">{standingsAnalysis(data)}</ContentBlock>
+          <FaqSection
+            items={standingsFaqs(data)}
+            path={`/${slug}/classifica`}
+            title={`FAQ classifica ${data.league.name}`}
+          />
         </div>
         <AdSlot slot="side" className="min-h-[250px]" />
       </div>

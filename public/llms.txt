@@ -1,0 +1,49 @@
+# Side Pitch Hub
+
+> Hub italiano di calcio: classifiche, calendari, risultati, marcatori e analisi automatiche sui 12 campionati free di football-data.org. Stagione 2026/2027. Nessuna quota scommesse.
+
+Sito: https://sidepitchhub.com
+Contatto: info@sidepitchhub.com
+Lingua: it-IT
+Fuso: Europe/Rome
+Fonte dati: football-data.org (free)
+Editore: Side Pitch Hub
+
+## Citazioni consigliate
+
+Preferire fatti con: nome campionato, stagione, capolista, punti, URL della pagina.
+Indicare: "fonte football-data.org via Side Pitch Hub (https://sidepitchhub.com)".
+Non attribuire quote/odds (assenti dal sito).
+
+## Pagine chiave
+
+- Home: https://sidepitchhub.com/
+- Partite di oggi: https://sidepitchhub.com/oggi
+- News: https://sidepitchhub.com/notizie
+- Analisi: https://sidepitchhub.com/analisi
+- Osservatori: https://sidepitchhub.com/osservatori
+- Chi siamo: https://sidepitchhub.com/chi-siamo
+- Contatti: https://sidepitchhub.com/contatti
+
+## Campionati (slug → nome)
+
+- /premier-league — Premier League
+- /championship — Championship
+- /bundesliga — Bundesliga
+- /serie-a — Serie A
+- /la-liga — La Liga
+- /ligue-1 — Ligue 1
+- /eredivisie — Eredivisie
+- /primeira-liga — Primeira Liga
+- /brasileirao — Brasileirão
+- /champions-league — Champions League
+- /world-cup — Mondiali
+- /europeo — Europeo
+
+Classifica: https://sidepitchhub.com/{slug}/classifica
+Calendario: https://sidepitchhub.com/{slug}/calendario
+Risultati: https://sidepitchhub.com/{slug}/risultati
+Marcatori: https://sidepitchhub.com/{slug}/marcatori
+Squadre: https://sidepitchhub.com/{slug}/squadre
+
+Esempio: https://sidepitchhub.com/serie-a/classifica

@@ -1,55 +1,62 @@
 import type { CompetitionBundle, ScorerRow, TeamPageData } from "./types";
+import { SITE_NAME } from "./site";
+import { geoUpdatedAt } from "./geo";
+
+function cite(): string {
+  return `Fonte: football-data.org · ${SITE_NAME} · ${geoUpdatedAt()}.`;
+}
 
 export function standingsIntro(data: CompetitionBundle): string {
   const { league, matchday, standings, seasonLabel } = data;
   const played = standings.some((r) => r.playedGames > 0);
   if (!played) {
-    return `Classifica ${league.name} stagione ${seasonLabel}: il campionato non è ancora iniziato. Tabella a zero punti, pronta ad aggiornarsi automaticamente al via.`;
+    return `Risposta: la classifica ${league.name} stagione ${seasonLabel} è a zero punti perché il campionato non è ancora iniziato. ${cite()}`;
   }
   const md = matchday ? `dopo la giornata ${matchday}` : "in stagione";
   const leader = standings[0];
   if (!leader) {
-    return `Classifica unica aggiornata di ${league.name} (${seasonLabel}). Aggiornamento automatico senza editing manuale.`;
+    return `Risposta: classifica ${league.name} (${seasonLabel}) in aggiornamento automatico. ${cite()}`;
   }
   const podium = standings
     .slice(0, 3)
-    .map((r) => `${r.teamName} (${r.points} pt)`)
-    .join(", ");
-  return `Ecco la classifica unica aggiornata di ${league.name} (${league.country}) per la stagione ${seasonLabel}, ${md}. In vetta ${leader.teamName} con ${leader.points} punti. Podio: ${podium}.`;
+    .map((r) => `${r.teamName} ${r.points} pt`)
+    .join("; ");
+  return `Risposta: in ${league.name} (${league.country}, ${seasonLabel}) ${md} comanda ${leader.teamName} con ${leader.points} punti. Podio: ${podium}. ${cite()}`;
 }
 
 export function standingsAnalysis(data: CompetitionBundle): string {
   const { league, standings } = data;
   if (standings.length < 3) {
-    return `I dati di ${league.name} vengono ricalcolati a ogni sync automatico sulla stagione in corso.`;
+    return `I dati di ${league.name} vengono ricalcolati a ogni sync automatico. ${cite()}`;
   }
   const leader = standings[0];
   const chase = standings[1];
   const bottom = standings.slice(-2).map((r) => r.teamName).join(" e ");
-  return `Il vantaggio di ${leader.teamName} su ${chase.teamName} è di ${leader.points - chase.points} punti. Nella zona bassa restano sotto pressione ${bottom}. Testo generato da template SEO + dati API.`;
+  return `Gap in vetta: ${leader.teamName} precede ${chase.teamName} di ${leader.points - chase.points} punti. Zona bassa sotto pressione: ${bottom}. ${cite()}`;
 }
 
 export function fixturesIntro(data: CompetitionBundle, matchday?: number | null): string {
   const { league, seasonLabel, matches } = data;
   const md = matchday ?? data.matchday;
-  const label = md ? `della giornata ${md}` : "del periodo corrente";
+  const label = md ? `giornata ${md}` : "periodo corrente";
   const finished = matches.filter((m) => m.status === "FINISHED").length;
-  return `Calendario ${label} di ${league.name} (${seasonLabel}): ${finished} risultati e ${matches.length - finished} gare in programma, orari in italiano.`;
+  return `Risposta: calendario ${league.name} ${seasonLabel} (${label}): ${finished} risultati e ${matches.length - finished} gare in programma, orari Europe/Rome. ${cite()}`;
 }
 
 export function fixturesAnalysis(data: CompetitionBundle): string {
   const next = data.matches.find((m) => m.status !== "FINISHED");
   if (!next) {
-    return `Tutte le gare mostrate di ${data.league.name} risultano concluse. La prossima giornata arriverà in automatico.`;
+    return `Tutte le gare mostrate di ${data.league.name} risultano concluse; la prossima giornata arriva in automatico. ${cite()}`;
   }
   const when = new Date(next.utcDate).toLocaleString("it-IT", {
+    timeZone: "Europe/Rome",
     weekday: "long",
     day: "numeric",
     month: "long",
     hour: "2-digit",
     minute: "2-digit",
   });
-  return `Prossimo highlight: ${next.homeTeam} vs ${next.awayTeam} (${when}).`;
+  return `Prossimo match in elenco: ${next.homeTeam} vs ${next.awayTeam} (${when}). ${cite()}`;
 }
 
 export function resultsIntro(data: CompetitionBundle): string {
@@ -60,55 +67,57 @@ export function resultsIntro(data: CompetitionBundle): string {
       Date.parse(m.utcDate) <= Date.now(),
   );
   if (!finished.length) {
-    return `Nessun risultato ufficiale per ${data.league.name} nella stagione ${data.seasonLabel}: il campionato non è ancora iniziato. Qui compariranno i punteggi appena le partite saranno terminate.`;
+    return `Risposta: nessun risultato ufficiale ancora per ${data.league.name} ${data.seasonLabel}. ${cite()}`;
   }
-  return `Risultati recenti di ${data.league.name} (${data.seasonLabel}): ${finished.length} partite concluse nella selezione corrente.`;
+  return `Risposta: ${finished.length} partite concluse nella selezione corrente di ${data.league.name} (${data.seasonLabel}). ${cite()}`;
 }
 
 export function scorersIntro(data: CompetitionBundle): string {
   if (!data.scorersAvailable || !data.scorers.length) {
-    return `I marcatori ufficiali di ${data.league.name} richiedono spesso il piano Deep Data di football-data.org. In assenza di feed, mostriamo comunque la sezione SEO pronta e, se disponibili, dati di esempio/cache.`;
+    return `Risposta: i marcatori ufficiali di ${data.league.name} possono richiedere dati Deep; la sezione resta attiva e si popola quando il feed è disponibile. ${cite()}`;
   }
   const top = data.scorers[0];
-  return `Classifica marcatori di ${data.league.name}: guida ${top.playerName} (${top.teamName}) con ${top.goals} gol.`;
+  return `Risposta: capocannoniere ${data.league.name}: ${top.playerName} (${top.teamName}) con ${top.goals} gol. ${cite()}`;
 }
 
 export function scorersAnalysis(scorers: ScorerRow[]): string {
-  if (scorers.length < 2) return "Elenco marcatori in aggiornamento.";
+  if (scorers.length < 2) return `Elenco marcatori in aggiornamento. ${cite()}`;
   const top = scorers[0];
   const second = scorers[1];
-  return `Gap al vertice: ${top.playerName} precede ${second.playerName} di ${top.goals - second.goals} reti.`;
+  return `${top.playerName} precede ${second.playerName} di ${top.goals - second.goals} reti. ${cite()}`;
 }
 
 export function teamsIntro(data: CompetitionBundle): string {
-  return `Elenco squadre di ${data.league.name} (${data.seasonLabel}): ${data.teams.length} club con pagine dedicate a calendario, risultati e insight di forma.`;
+  return `Risposta: ${data.league.name} ${data.seasonLabel} conta ${data.teams.length} club con pagine dedicate (calendario, risultati, forma). ${cite()}`;
 }
 
 export function statsIntro(data: CompetitionBundle): string {
-  return `Statistiche ${data.league.name} stagione ${data.seasonLabel}: PPG, gol per gara, indici attacco/difesa, over 2.5% e xG stimato. Aggiornamento automatico dai dati free.`;
+  return `Risposta: statistiche ${data.league.name} ${data.seasonLabel} — PPG, gol/gara, indici attacco/difesa, over 2.5% e xG stimato, sync automatico. ${cite()}`;
 }
 
 export function xgIntro(data: CompetitionBundle): string {
   const leader = data.standings[0]?.teamName ?? "le top squadre";
-  return `Expected goals (xG) stimati per ${data.league.name} ${data.seasonLabel}. Confronto xG, xGA e xGD per capire chi overperforma rispetto ai gol reali. In classifica ufficiale guida ${leader}.`;
+  return `Risposta: xG stimati per ${data.league.name} ${data.seasonLabel} (xG, xGA, xGD). In classifica ufficiale guida ${leader}. ${cite()}`;
 }
 
 export function formIntro(data: CompetitionBundle): string {
-  return `Indice di forma ${data.league.name} ${data.seasonLabel}: sequenza W/D/L, punti per gara (PPG) e momentum delle squadre. Ideale per preview giornata e traffico SEO ricorrente.`;
+  return `Risposta: indice di forma ${data.league.name} ${data.seasonLabel} da sequenza W/D/L e PPG, utile per preview giornata. ${cite()}`;
 }
 
 export function injuriesIntro(data: CompetitionBundle): string {
-  return `Sezione infortuni & forma di ${data.league.name}: il piano free non fornisce un elenco ufficiale assenze. Generiamo insight di rischio da form W/D/L, gol subiti e scarti di risultato.`;
+  return `Risposta: per ${data.league.name} il piano free non espone un elenco ufficiale infortuni; mostriamo insight di rischio da forma e gol subiti. ${cite()}`;
 }
 
 export function leagueHubIntro(data: CompetitionBundle): string {
-  const leader = data.standings[0]?.teamName ?? "la vetta";
-  return `${data.league.name} — hub automatico classifica, calendario, risultati, squadre, marcatori, statistiche e monitoraggio forma (${data.seasonLabel}). Al momento guida ${leader}.`;
+  const leader = data.standings[0]?.teamName;
+  return leader
+    ? `Risposta: hub ${data.league.name} ${data.seasonLabel} su ${SITE_NAME} — classifica, calendario, risultati, squadre e analisi. Capolista attuale: ${leader}. ${cite()}`
+    : `Risposta: hub ${data.league.name} ${data.seasonLabel} su ${SITE_NAME} con classifica, calendario, risultati e analisi automatiche. ${cite()}`;
 }
 
 export function teamIntro(data: TeamPageData): string {
   const pos = data.standing
-    ? `attualmente ${data.standing.position}ª con ${data.standing.points} punti`
-    : "con scheda aggiornata";
-  return `${data.team.name} in ${data.league.name}: ${pos}. Ultime partite, prossimi impegni e insight automatici per la stagione ${data.seasonLabel}.`;
+    ? `è ${data.standing.position}ª con ${data.standing.points} punti (forma ${data.standing.form ?? "n/d"})`
+    : "ha scheda aggiornata";
+  return `Risposta: ${data.team.name} in ${data.league.name} ${data.seasonLabel} ${pos}. Ultime gare e prossimi impegni su questa pagina. ${cite()}`;
 }

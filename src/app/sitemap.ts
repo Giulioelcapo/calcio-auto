@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { LEAGUE_SECTIONS, LEAGUES } from "@/lib/leagues";
 import { siteUrl } from "@/lib/site";
 
-const LEGAL = ["privacy", "cookie", "contatti", "chi-siamo"] as const;
+const LEGAL = ["privacy", "cookie", "contatti", "chi-siamo", "guida"] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteUrl();

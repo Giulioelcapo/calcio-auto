@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AdSlot } from "@/components/AdSlot";
-import { PollPanel } from "@/components/PollPanel";
+import { FaqSection } from "@/components/FaqSection";
 import { FreeDeskSection } from "@/components/FreeDeskSection";
 import { OsservatoriSection } from "@/components/OsservatoriSection";
 import { PartnerOffers } from "@/components/PartnerOffers";
+import { PollPanel } from "@/components/PollPanel";
 import { RankingsSection } from "@/components/RankingsSection";
 import {
   getFreeDeskReport,
@@ -13,6 +14,7 @@ import {
   getTodaysMatches,
   listLeagues,
 } from "@/lib/football-api";
+import { siteFaqs } from "@/lib/geo";
 import { getFootballNews } from "@/lib/news";
 import { getServerPollState } from "@/lib/poll-server";
 
@@ -285,6 +287,8 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      <FaqSection items={siteFaqs()} path="/" title="Domande su Side Pitch Hub" />
     </div>
   );
 }

@@ -2,11 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdSlot } from "@/components/AdSlot";
+import { AiAnswerBlock } from "@/components/AiAnswerBlock";
 import { AmazonContextPromo } from "@/components/AmazonContextPromo";
 import { InsightCards } from "@/components/DataViews";
+import { FaqSection } from "@/components/FaqSection";
+import { JsonLd } from "@/components/JsonLd";
 import { ContentBlock, LeagueNav, MockBanner } from "@/components/LeagueNav";
 import { leagueHubIntro } from "@/lib/content-templates";
 import { getCompetitionBundle, getLeagueFreeBundle } from "@/lib/football-api";
+import { leagueFaqs, sportsLeagueJsonLd } from "@/lib/geo";
 import { getAllLeagueSlugs } from "@/lib/leagues";
 import { getLeagueNews } from "@/lib/news";
 import { Crest } from "@/components/Crest";
@@ -55,6 +59,7 @@ export default async function LeagueHubPage({ params }: Props) {
 
   return (
     <div className="space-y-6">
+      <JsonLd data={sportsLeagueJsonLd(data)} />
       <MockBanner usingMock={data.usingMock} />
       <div className="space-y-2">
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
@@ -69,6 +74,7 @@ export default async function LeagueHubPage({ params }: Props) {
         ) : null}
       </div>
       <LeagueNav slug={slug} />
+      <AiAnswerBlock answer={leagueHubIntro(data)} />
       <AdSlot slot="top" />
       <AmazonContextPromo label={data.league.name} kind="league" />
       <ContentBlock>{leagueHubIntro(data)}</ContentBlock>
@@ -142,6 +148,11 @@ export default async function LeagueHubPage({ params }: Props) {
           </Link>
         ))}
       </div>
+      <FaqSection
+        items={leagueFaqs(data)}
+        path={`/${slug}`}
+        title={`FAQ ${data.league.name}`}
+      />
     </div>
   );
 }

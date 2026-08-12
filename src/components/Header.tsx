@@ -127,6 +127,9 @@ export function Footer() {
           <Link href="/notizie" className="hover:text-[var(--accent)]">
             Notizie
           </Link>
+          <Link href="/guida" className="hover:text-[var(--accent)]">
+            Guida
+          </Link>
           <Link href="/chi-siamo" className="hover:text-[var(--accent)]">
             Chi siamo
           </Link>
