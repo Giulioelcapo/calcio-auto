@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { listBlogPosts } from "@/lib/blog";
 import { LEAGUE_SECTIONS, LEAGUES } from "@/lib/leagues";
 import { siteUrl } from "@/lib/site";
 
@@ -46,6 +47,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
     },
     {
+      url: `${base}/blog`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.88,
+    },
+    {
       url: `${base}/partner`,
       lastModified: now,
       changeFrequency: "weekly",
@@ -58,6 +65,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
   ];
+
+  for (const post of listBlogPosts()) {
+    entries.push({
+      url: `${base}/blog/${post.slug}`,
+      lastModified: new Date(post.updated ?? post.date),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    });
+  }
 
   for (const league of LEAGUES.slice(0, 12)) {
     entries.push({

@@ -2,11 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { AdSlot } from "@/components/AdSlot";
 import { FaqSection } from "@/components/FaqSection";
+import { BlogPostCard } from "@/components/Blog";
 import { FreeDeskSection } from "@/components/FreeDeskSection";
 import { OsservatoriSection } from "@/components/OsservatoriSection";
 import { PartnerOffers } from "@/components/PartnerOffers";
 import { PollPanel } from "@/components/PollPanel";
 import { RankingsSection } from "@/components/RankingsSection";
+import { listBlogPosts } from "@/lib/blog";
 import {
   getFreeDeskReport,
   getHomeRankings,
@@ -34,6 +36,7 @@ export default async function HomePage() {
       getOsservatoriReport(),
       getFreeDeskReport(),
     ]);
+  const blogPosts = listBlogPosts().slice(0, 2);
   const hasMatchesToday = today.matches.length > 0;
   const featured = news[0];
   const sideNews = news.slice(1, 4);
@@ -242,6 +245,25 @@ export default async function HomePage() {
       <FreeDeskSection report={freeDesk} compact />
 
       <OsservatoriSection report={osservatori} compact />
+
+      {blogPosts.length ? (
+        <section className="space-y-4">
+          <div className="section-rule">
+            <h2>Blog</h2>
+            <Link
+              href="/blog"
+              className="section-meta hover:text-[var(--accent)]"
+            >
+              Tutti gli articoli
+            </Link>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {blogPosts.map((post) => (
+              <BlogPostCard key={post.slug} post={post} />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="space-y-4">
         <div className="section-rule">

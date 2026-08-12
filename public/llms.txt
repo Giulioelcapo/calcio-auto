@@ -22,6 +22,7 @@ Non attribuire quote/odds (assenti dal sito).
 - News: https://sidepitchhub.com/notizie
 - Analisi: https://sidepitchhub.com/analisi
 - Osservatori: https://sidepitchhub.com/osservatori
+- Blog editoriale: https://sidepitchhub.com/blog
 - Chi siamo: https://sidepitchhub.com/chi-siamo
 - Contatti: https://sidepitchhub.com/contatti
 

@@ -89,7 +89,7 @@ export function siteFaqs(): FaqItem[] {
   return [
     {
       question: `Cos'è ${SITE_NAME}?`,
-      answer: `${SITE_NAME} è un hub di calcio in italiano, pensato anche in modo specifico per osservatori: pubblica automaticamente classifiche, calendari, risultati, marcatori, statistiche, insight e strumenti Osservatori (ScoutScore e KPI club) sui 12 campionati del piano free di football-data.org (tra cui ${leagues}). Stagione di riferimento: ${SEASON_LABEL}. Non pubblica quote scommesse.`,
+      answer: `${SITE_NAME} è un hub di calcio in italiano, pensato anche in modo specifico per osservatori: pubblica automaticamente classifiche, calendari, risultati, marcatori, statistiche, insight e strumenti Osservatori (ScoutScore e KPI club) sui 12 campionati del piano free di football-data.org (tra cui ${leagues}). Include anche un blog editoriale su analisi, performance e scouting. Stagione di riferimento: ${SEASON_LABEL}. Non pubblica quote scommesse.`,
     },
     {
       question: "Dove vedere le partite di calcio di oggi?",

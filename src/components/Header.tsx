@@ -37,6 +37,12 @@ export async function Header() {
             Gol
           </Link>
           <Link
+            href="/blog"
+            className="whitespace-nowrap px-2 py-1 hover:bg-white/5 hover:text-[var(--ink)]"
+          >
+            Blog
+          </Link>
+          <Link
             href="/analisi"
             className="whitespace-nowrap px-2 py-1 hover:bg-white/5 hover:text-[var(--ink)]"
           >
@@ -114,6 +120,9 @@ export function Footer() {
           </Link>
           <Link href="/partner" className="font-semibold text-[var(--accent)] hover:text-[var(--ink)]">
             Shop Amazon
+          </Link>
+          <Link href="/blog" className="hover:text-[var(--accent)]">
+            Blog
           </Link>
           <Link href="/analisi" className="hover:text-[var(--accent)]">
             Analisi
