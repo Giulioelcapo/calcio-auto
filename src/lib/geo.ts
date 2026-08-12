@@ -89,7 +89,7 @@ export function siteFaqs(): FaqItem[] {
   return [
     {
       question: `Cos'è ${SITE_NAME}?`,
-      answer: `${SITE_NAME} è un hub di calcio in italiano che pubblica automaticamente classifiche, calendari, risultati, marcatori, statistiche e insight sui 12 campionati del piano free di football-data.org (tra cui ${leagues}). Stagione di riferimento: ${SEASON_LABEL}. Non pubblica quote scommesse.`,
+      answer: `${SITE_NAME} è un hub di calcio in italiano, pensato anche in modo specifico per osservatori: pubblica automaticamente classifiche, calendari, risultati, marcatori, statistiche, insight e strumenti Osservatori (ScoutScore e KPI club) sui 12 campionati del piano free di football-data.org (tra cui ${leagues}). Stagione di riferimento: ${SEASON_LABEL}. Non pubblica quote scommesse.`,
     },
     {
       question: "Dove vedere le partite di calcio di oggi?",
@@ -98,10 +98,6 @@ export function siteFaqs(): FaqItem[] {
     {
       question: `Quali campionati copre ${SITE_NAME}?`,
       answer: `Copre i 12 campionati free di football-data.org: ${leagues}. Per ciascuno trovi hub, classifica, calendario, risultati, squadre e analisi.`,
-    },
-    {
-      question: "I dati sono ufficiali e aggiornati?",
-      answer: `I dati sportivi provengono da football-data.org (piano free). ${SITE_NAME} li sincronizza in automatico: classifiche e risultati riflettono l'ultimo sync disponibile. Fonte dati citabile: football-data.org; editore: ${SITE_NAME} (${siteUrl()}).`,
     },
     {
       question: "Dove trovo la classifica Serie A aggiornata?",
