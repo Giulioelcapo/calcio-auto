@@ -50,10 +50,22 @@ export async function redisCommand(
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
+    if (/NOPERM|no permissions|read.?only/i.test(text)) {
+      throw new Error(
+        "Token Redis in sola lettura. Su Upstash copia il REST Token (non Read-Only), aggiornalo su Vercel come UPSTASH_REDIS_REST_TOKEN e fai Redeploy.",
+      );
+    }
     throw new Error(`Redis error ${res.status}: ${text.slice(0, 200)}`);
   }
 
   const data = (await res.json()) as { result?: unknown; error?: string };
-  if (data.error) throw new Error(data.error);
+  if (data.error) {
+    if (/NOPERM|no permissions|read.?only/i.test(data.error)) {
+      throw new Error(
+        "Token Redis in sola lettura. Su Upstash copia il REST Token (non Read-Only), aggiornalo su Vercel come UPSTASH_REDIS_REST_TOKEN e fai Redeploy.",
+      );
+    }
+    throw new Error(data.error);
+  }
   return data.result ?? null;
 }
