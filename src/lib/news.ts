@@ -82,7 +82,7 @@ async function fetchFeed(url: string): Promise<NewsItem[]> {
   try {
     const res = await fetch(url, {
       headers: {
-        "User-Agent": "SidePitchHubBot/1.0 (+https://calcio-auto.vercel.app)",
+        "User-Agent": "SidePitchHubBot/1.0 (+https://sidepitchhub.com)",
         Accept: "application/rss+xml, application/xml, text/xml",
       },
       cache: "no-store",

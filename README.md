@@ -2,7 +2,7 @@
 
 Blog/web app calcio automatico, SEO-first, pronto per Google AdSense.
 
-**Live:** https://calcio-auto.vercel.app
+**Live:** https://sidepitchhub.com (anche `https://calcio-auto.vercel.app`)
 
 ## Avvio locale
 
@@ -25,22 +25,22 @@ In **Settings → Environment Variables** (Production), aggiungi/aggiorna:
 
 | Key | Value |
 |-----|--------|
-| `NEXT_PUBLIC_SITE_URL` | `https://calcio-auto.vercel.app` |
+| `NEXT_PUBLIC_SITE_URL` | `https://sidepitchhub.com` |
 | `NEXT_PUBLIC_CONTACT_EMAIL` | la tua email reale |
 
 Poi **Redeploy** (senza build cache se hai dubbi).
 
 ### 3) Google Search Console
 1. https://search.google.com/search-console
-2. **Aggiungi proprietà** → prefisso URL → `https://calcio-auto.vercel.app`
+2. **Aggiungi proprietà** → prefisso URL → `https://sidepitchhub.com`
 3. Verifica (meta tag HTML):
    - copia il codice `content="...."`
    - su Vercel aggiungi `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=quelcodice`
    - Redeploy → Completa verifica in Search Console
-4. **Sitemaps** → invia: `https://calcio-auto.vercel.app/sitemap.xml`
+4. **Sitemaps** → invia: `https://sidepitchhub.com/sitemap.xml`
 
 ### 4) Google AdSense
-1. https://www.google.com/adsense/ — richiedi il sito `https://calcio-auto.vercel.app`
+1. https://www.google.com/adsense/ — richiedi / aggiungi il sito `https://sidepitchhub.com`
 2. Attendi approvazione (giorni/settimane)
 3. Crea 3 unità Display responsive (Top / Side / In-content)
 4. Su Vercel:
