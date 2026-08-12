@@ -49,6 +49,12 @@ export async function Header() {
             Osservatori
           </Link>
           <Link
+            href="/partner"
+            className="whitespace-nowrap px-2 py-1 hover:bg-white/5 hover:text-[var(--ink)]"
+          >
+            Partner
+          </Link>
+          <Link
             href="/sondaggio"
             className="whitespace-nowrap px-2 py-1 hover:bg-white/5 hover:text-[var(--ink)]"
           >
@@ -105,6 +111,9 @@ export function Footer() {
           </Link>
           <Link href="/gol" className="hover:text-[var(--accent)]">
             Gol
+          </Link>
+          <Link href="/partner" className="hover:text-[var(--accent)]">
+            Partner
           </Link>
           <Link href="/analisi" className="hover:text-[var(--accent)]">
             Analisi

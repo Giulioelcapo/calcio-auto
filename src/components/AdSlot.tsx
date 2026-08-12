@@ -30,20 +30,20 @@ function PartnerBanner({
   className: string;
 }) {
   const partner = partnerSlot(slot);
-  const minH = slot === "side" ? "min-h-[120px]" : "min-h-[72px]";
+  const minH = slot === "side" ? "min-h-[140px]" : "min-h-[88px]";
 
   const inner = (
     <div className="flex h-full flex-wrap items-center justify-between gap-3 px-4 py-3">
       <div className="min-w-0">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">
-          Partner
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+          Partner · Affiliate
         </p>
-        <p className="truncate text-sm font-semibold text-[var(--accent)]">
+        <p className="mt-1 truncate text-sm font-semibold text-[var(--ink)] sm:text-base">
           {partner.title}
         </p>
         <p className="text-xs text-[var(--muted)]">{partner.subtitle}</p>
       </div>
-      <span className="shrink-0 rounded bg-[var(--pitch)] px-3 py-1.5 text-xs font-medium hover:brightness-110">
+      <span className="btn-accent shrink-0 px-3 py-1.5 text-xs uppercase tracking-[0.12em]">
         {partner.cta}
       </span>
     </div>
@@ -51,7 +51,7 @@ function PartnerBanner({
 
   return (
     <aside
-      className={`panel overflow-hidden rounded-md ${minH} ${className}`}
+      className={`panel overflow-hidden ${minH} ${className}`}
       aria-label={`Spazio partner ${slot}`}
     >
       {partner.external ? (
@@ -59,7 +59,7 @@ function PartnerBanner({
           href={partner.href}
           target="_blank"
           rel="noopener noreferrer sponsored"
-          className="block h-full"
+          className="block h-full transition hover:border-[var(--accent)]"
         >
           {inner}
         </a>
@@ -97,7 +97,6 @@ export function AdSlot({ slot = "top", className = "" }: AdSlotProps) {
     }
   }, [client, adSlotId, allowed]);
 
-  // AdSense solo se hai client + slot + consenso cookie
   if (client && adSlotId && allowed) {
     const minH = slot === "side" ? "min-h-[250px]" : "min-h-[90px]";
     return (
@@ -117,6 +116,5 @@ export function AdSlot({ slot = "top", className = "" }: AdSlotProps) {
     );
   }
 
-  // Senza AdSense: banner partner / affiliate / contatto sponsor
   return <PartnerBanner slot={slot} className={className} />;
 }

@@ -1,3 +1,9 @@
+import {
+  offerBySlot,
+  offerHref,
+  type AffiliateOffer,
+} from "@/lib/affiliates";
+
 export function siteUrl(): string {
   const explicit = process.env["NEXT_PUBLIC_SITE_URL"]?.replace(/\/$/, "").trim();
   if (explicit) return explicit;
@@ -34,7 +40,7 @@ export function adsenseSlot(
   return value || undefined;
 }
 
-export type PartnerSlotKind = "top" | "side" | "in-content";
+export type PartnerSlotKind = AffiliateOffer["slot"];
 
 export type PartnerSlotConfig = {
   href: string;
@@ -44,7 +50,7 @@ export type PartnerSlotConfig = {
   external: boolean;
 };
 
-/** Banner partner/affiliate (funziona senza AdSense). */
+/** Banner partner / affiliate (funziona senza AdSense). */
 export function partnerSlot(kind: PartnerSlotKind): PartnerSlotConfig {
   const map = {
     top: {
@@ -74,13 +80,14 @@ export function partnerSlot(kind: PartnerSlotKind): PartnerSlotConfig {
     };
   }
 
-  // Fallback pronto: invito sponsor diretto
+  // Default: offerte Amazon (commissioni se NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG è set)
+  const offer = offerBySlot(kind);
   return {
-    href: "/contatti",
-    title: "Spazio partner",
-    subtitle: "Pubblicità e collaborazioni su Side Pitch Hub",
-    cta: "Contattaci",
-    external: false,
+    href: offerHref(offer),
+    title: offer.title,
+    subtitle: offer.subtitle,
+    cta: offer.cta,
+    external: true,
   };
 }
 

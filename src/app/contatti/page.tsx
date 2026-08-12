@@ -22,6 +22,15 @@ export default function ContattiPage() {
         <a href={`mailto:${email}`}>{email}</a>
       </p>
 
+      <h2>Sponsor / partner</h2>
+      <p>
+        Per banner e collaborazioni:{" "}
+        <a href="mailto:info@sidepitchhub.com?subject=Sponsor%20Side%20Pitch%20Hub">
+          info@sidepitchhub.com
+        </a>{" "}
+        oppure la pagina <a href="/partner">/partner</a>.
+      </p>
+
       <h2>Tempi di risposta</h2>
       <p>
         Cerchiamo di rispondere entro pochi giorni lavorativi. Per richieste

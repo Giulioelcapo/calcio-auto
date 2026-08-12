@@ -4,6 +4,7 @@ import { AdSlot } from "@/components/AdSlot";
 import { PollPanel } from "@/components/PollPanel";
 import { FreeDeskSection } from "@/components/FreeDeskSection";
 import { OsservatoriSection } from "@/components/OsservatoriSection";
+import { PartnerOffers } from "@/components/PartnerOffers";
 import { RankingsSection } from "@/components/RankingsSection";
 import {
   getFreeDeskReport,
@@ -234,6 +235,8 @@ export default async function HomePage() {
       <FreeDeskSection report={freeDesk} compact />
 
       <OsservatoriSection report={osservatori} compact />
+
+      <PartnerOffers compact />
 
       <section className="space-y-4">
         <div className="section-rule">
