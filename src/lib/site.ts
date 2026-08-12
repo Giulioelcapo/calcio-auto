@@ -116,7 +116,8 @@ export function contactEmail(): string {
 export function xHandle(): string | undefined {
   const fromEnv = process.env["NEXT_PUBLIC_X_HANDLE"]?.trim().replace(/^@/, "");
   if (fromEnv) return fromEnv;
-  return undefined;
+  // Default brand account
+  return "sidepitchhub";
 }
 
 /** Profilo X pubblico, se configurato. */
