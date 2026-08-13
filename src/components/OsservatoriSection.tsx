@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { Crest } from "@/components/Crest";
-import type { ClubRadar, OsservatoriReport, ScoutPlayer } from "@/lib/osservatori";
+import type {
+  ClubRadar,
+  OsservatoriReport,
+  ScoutAlert,
+  ScoutPlayer,
+} from "@/lib/osservatori";
 import { teamPathSlug } from "@/lib/slug";
 
 function categoryTone(category: ScoutPlayer["category"]) {
@@ -13,6 +18,19 @@ function categoryTone(category: ScoutPlayer["category"]) {
       return "border-[#c084fc] text-[#d8b4fe]";
     case "clinical":
       return "border-[#f0b429] text-[var(--warn)]";
+    default:
+      return "border-[var(--line)] text-[var(--muted)]";
+  }
+}
+
+function alertTone(tone: ScoutAlert["tone"]) {
+  switch (tone) {
+    case "hot":
+      return "border-[var(--accent)]/50 text-[var(--accent)]";
+    case "gem":
+      return "border-[#5b8def]/50 text-[#8eb6ff]";
+    case "warn":
+      return "border-[var(--warn)]/50 text-[var(--warn)]";
     default:
       return "border-[var(--line)] text-[var(--muted)]";
   }
@@ -32,6 +50,22 @@ function Kpi({
       <div className="text-[9px] uppercase tracking-wide text-[var(--muted)]">
         {label}
       </div>
+    </div>
+  );
+}
+
+function SignalRow({ signals }: { signals: string[] }) {
+  if (!signals.length) return null;
+  return (
+    <div className="flex flex-wrap gap-1">
+      {signals.map((s) => (
+        <span
+          key={s}
+          className="rounded border border-[var(--line)] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[var(--muted)]"
+        >
+          {s}
+        </span>
+      ))}
     </div>
   );
 }
@@ -71,19 +105,24 @@ function PlayerCard({ player }: { player: ScoutPlayer }) {
         </div>
       </div>
 
+      <SignalRow signals={player.signals} />
+
       <div className="mt-auto grid grid-cols-4 gap-1.5 sm:grid-cols-5">
         <Kpi label="Gol" value={k.goals} />
         <Kpi label="Ast" value={k.assists} />
-        <Kpi label="Rig" value={k.penalties} />
-        <Kpi label="PG" value={k.played} />
         <Kpi label="G+A" value={k.goalInvolvements} />
-        <Kpi label="Open" value={k.openPlayGoals} />
+        <Kpi label="PG" value={k.played} />
         <Kpi label="G/G" value={k.goalsPerGame} />
         <Kpi label="A/G" value={k.assistsPerGame} />
-        <Kpi label="Inv/G" value={k.involvementsPerGame} />
         <Kpi
-          label="%Rig"
-          value={k.penaltyShare != null ? `${k.penaltyShare}%` : null}
+          label="%Team"
+          value={k.teamGoalShare != null ? `${k.teamGoalShare}%` : null}
+        />
+        <Kpi label="Dep" value={k.dependencyIndex} />
+        <Kpi label="Ctx" value={k.contextIndex} />
+        <Kpi
+          label="%Open"
+          value={k.openPlayShare != null ? `${k.openPlayShare}%` : null}
         />
       </div>
     </article>
@@ -119,23 +158,62 @@ function ClubCard({ club }: { club: ClubRadar }) {
         </div>
       </div>
 
+      <SignalRow signals={club.signals} />
+
       <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-5">
-        <Kpi label="G" value={k.played} />
-        <Kpi label="V" value={k.won} />
-        <Kpi label="N" value={k.draw} />
-        <Kpi label="P" value={k.lost} />
-        <Kpi label="Pt" value={k.points} />
-        <Kpi label="GF" value={k.goalsFor} />
-        <Kpi label="GS" value={k.goalsAgainst} />
-        <Kpi label="DR" value={k.goalDiff} />
         <Kpi label="PPG" value={k.ppg} />
-        <Kpi label="Form" value={k.form ?? k.formScore} />
+        <Kpi label="H PPG" value={k.homePpg} />
+        <Kpi label="A PPG" value={k.awayPpg} />
+        <Kpi label="Δ H/A" value={k.homeAwayGap} />
+        <Kpi label="Mom" value={k.momentum} />
+        <Kpi label="Streak" value={k.streakLabel} />
         <Kpi label="GF/G" value={k.gfPerGame} />
         <Kpi label="GS/G" value={k.gaPerGame} />
         <Kpi label="ATK" value={k.attackIndex} />
         <Kpi label="DEF" value={k.defenseIndex} />
+        <Kpi label="Bal" value={k.balanceIndex} />
+        <Kpi label="Form" value={k.formScore} />
       </div>
     </article>
+  );
+}
+
+function AlertsBlock({ alerts }: { alerts: ScoutAlert[] }) {
+  if (!alerts.length) return null;
+  return (
+    <div className="space-y-3">
+      <h3 className="display-font text-sm font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
+        Segnali scout
+      </h3>
+      <div className="grid gap-2 md:grid-cols-2">
+        {alerts.map((alert) => (
+          <article
+            key={alert.id}
+            className={`rounded border bg-black/25 px-3 py-2.5 ${alertTone(alert.tone)}`}
+          >
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em]">
+              {alert.kind === "matchup"
+                ? "Matchup"
+                : alert.kind === "player"
+                  ? "Giocatore"
+                  : "Club"}
+            </p>
+            <p className="display-font mt-1 text-base font-bold uppercase tracking-wide text-[var(--ink)]">
+              {alert.href ? (
+                <Link href={alert.href} className="hover:text-[var(--accent)]">
+                  {alert.title}
+                </Link>
+              ) : (
+                alert.title
+              )}
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
+              {alert.body}
+            </p>
+          </article>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -148,8 +226,9 @@ export function OsservatoriSection({
 }) {
   const players = compact ? report.players.slice(0, 3) : report.players;
   const clubs = compact ? report.clubs.slice(0, 3) : report.clubs;
+  const alerts = compact ? report.alerts.slice(0, 4) : report.alerts;
 
-  if (!players.length && !clubs.length) return null;
+  if (!players.length && !clubs.length && !alerts.length) return null;
 
   return (
     <section className="space-y-5">
@@ -167,21 +246,28 @@ export function OsservatoriSection({
         ) : null}
       </div>
 
+      {!compact ? <AlertsBlock alerts={alerts} /> : null}
+
       {players.length ? (
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {players.map((player) => (
-            <PlayerCard key={player.id} player={player} />
-          ))}
+        <div className="space-y-3">
+          {!compact ? (
+            <h3 className="display-font text-sm font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
+              Giocatori · ScoutScore
+            </h3>
+          ) : null}
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {players.map((player) => (
+              <PlayerCard key={player.id} player={player} />
+            ))}
+          </div>
         </div>
       ) : null}
 
       {clubs.length ? (
         <div className="space-y-3">
-          {players.length ? (
-            <h3 className="display-font text-sm font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
-              Club
-            </h3>
-          ) : null}
+          <h3 className="display-font text-sm font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
+            Club · Radar
+          </h3>
           <div className="grid gap-3 md:grid-cols-3">
             {clubs.map((club) => (
               <ClubCard key={club.id} club={club} />
@@ -189,6 +275,8 @@ export function OsservatoriSection({
           </div>
         </div>
       ) : null}
+
+      {compact && alerts.length ? <AlertsBlock alerts={alerts} /> : null}
     </section>
   );
 }

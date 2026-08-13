@@ -1,4 +1,7 @@
-import { assembleOsservatoriReport } from "./osservatori";
+import {
+  assembleOsservatoriReport,
+  parseFormScore,
+} from "./osservatori";
 import {
   buildInjuryInsights,
   buildLeagueInsights,
@@ -641,6 +644,8 @@ export type RankingsBoard = {
   away: StandingRow[];
   /** Tabella completa (per algoritmi osservatori) */
   allTotal: StandingRow[];
+  allHome: StandingRow[];
+  allAway: StandingRow[];
 };
 
 const RANKINGS_CACHE_TTL_MS = 10 * 60 * 1000;
@@ -678,6 +683,8 @@ async function fetchRankingsBoard(slug: string): Promise<RankingsBoard | null> {
       allTotal: full(mock, "TOTAL").length
         ? full(mock, "TOTAL")
         : pick(mock, "TOTAL", 20),
+      allHome: full(mock, "HOME"),
+      allAway: full(mock, "AWAY"),
     };
     return board;
   }
@@ -700,6 +707,8 @@ async function fetchRankingsBoard(slug: string): Promise<RankingsBoard | null> {
       allTotal: full(mock, "TOTAL").length
         ? full(mock, "TOTAL")
         : pick(mock, "TOTAL", 20),
+      allHome: full(mock, "HOME"),
+      allAway: full(mock, "AWAY"),
     };
   }
 
@@ -722,6 +731,8 @@ async function fetchRankingsBoard(slug: string): Promise<RankingsBoard | null> {
     home: pick(tables, "HOME"),
     away: pick(tables, "AWAY"),
     allTotal,
+    allHome: full(tables, "HOME"),
+    allAway: full(tables, "AWAY"),
   };
   rankingsCache.set(slug, { at: Date.now(), data: board });
   return board;
@@ -1097,15 +1108,16 @@ const OSSERVATORI_SLUGS = [
   "bundesliga",
 ] as const;
 
-/** Feed Osservatori: ScoutScore giocatori + radar club. */
+/** Feed Osservatori: ScoutScore giocatori + radar club + segnali matchup. */
 export async function getOsservatoriReport() {
   const boards = await Promise.all(
     OSSERVATORI_SLUGS.map(async (slug) => {
-      const [board, scorers] = await Promise.all([
+      const [board, scorers, matches] = await Promise.all([
         fetchRankingsBoard(slug),
         fetchScorersLite(slug),
+        fetchMatchesLite(slug),
       ]);
-      return { board, scorers };
+      return { board, scorers, matches };
     }),
   );
 
@@ -1115,23 +1127,45 @@ export async function getOsservatoriReport() {
       leagueSlug: string;
       teamPosition: number | null;
       teamPlayed: number;
+      teamGoalsFor: number | null;
+      teamFormScore: number | null;
     }
   > = [];
   const clubInputs: Array<{
     leagueName: string;
     leagueSlug: string;
     standings: StandingRow[];
+    homeByTeam?: Map<number, StandingRow>;
+    awayByTeam?: Map<number, StandingRow>;
+  }> = [];
+  const matchInputs: Array<{
+    leagueSlug: string;
+    leagueName: string;
+    matches: MatchItem[];
   }> = [];
 
-  for (const { board, scorers } of boards) {
+  for (const { board, scorers, matches } of boards) {
     if (!board) continue;
     const table = board.allTotal.length ? board.allTotal : board.total;
     const posByTeam = new Map(table.map((r) => [r.teamId, r] as const));
+    const homeByTeam = new Map(
+      (board.allHome ?? []).map((r) => [r.teamId, r] as const),
+    );
+    const awayByTeam = new Map(
+      (board.allAway ?? []).map((r) => [r.teamId, r] as const),
+    );
 
     clubInputs.push({
       leagueName: board.name,
       leagueSlug: board.slug,
       standings: table,
+      homeByTeam,
+      awayByTeam,
+    });
+    matchInputs.push({
+      leagueSlug: board.slug,
+      leagueName: board.name,
+      matches,
     });
 
     for (const s of scorers) {
@@ -1142,6 +1176,8 @@ export async function getOsservatoriReport() {
         leagueSlug: board.slug,
         teamPosition: teamRow?.position ?? null,
         teamPlayed: teamRow?.playedGames ?? s.playedMatches ?? 1,
+        teamGoalsFor: teamRow?.goalsFor ?? null,
+        teamFormScore: teamRow ? parseFormScore(teamRow.form) : null,
       });
     }
   }
@@ -1149,5 +1185,6 @@ export async function getOsservatoriReport() {
   return assembleOsservatoriReport({
     scorers: playerInputs,
     clubs: clubInputs,
+    matches: matchInputs,
   });
 }
