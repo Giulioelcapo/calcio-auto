@@ -34,8 +34,9 @@ export function CookieBanner() {
     <div className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--line)] bg-[color-mix(in_oklab,var(--panel)_96%,black)] p-4 shadow-2xl">
       <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-[var(--muted)]">
-          Usiamo cookie tecnici e, con il tuo consenso, cookie pubblicitari
-          (Google AdSense). Maggiori info nella{" "}
+          Usiamo cookie tecnici e, con il tuo consenso, cookie analitici
+          (Google Analytics) e pubblicitari (Google AdSense). Maggiori info
+          nella{" "}
           <Link href="/cookie" className="text-[var(--accent)] underline">
             Cookie Policy
           </Link>{" "}

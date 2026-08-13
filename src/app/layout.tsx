@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Barlow_Condensed, Oswald, Source_Sans_3 } from "next/font/google";
 import { CookieBanner } from "@/components/CookieBanner";
 import { AmazonFooterStrip } from "@/components/AmazonFooterStrip";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { Footer, Header } from "@/components/Header";
 import { JsonLd } from "@/components/JsonLd";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/geo";
@@ -9,6 +10,7 @@ import {
   SITE_NAME,
   SITE_TAGLINE,
   adsenseClient,
+  gaMeasurementId,
   googleSiteVerification,
   siteUrl,
 } from "@/lib/site";
@@ -35,6 +37,7 @@ const data = Barlow_Condensed({
 
 const verification = googleSiteVerification();
 const adsense = adsenseClient();
+const gaId = gaMeasurementId();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
@@ -98,6 +101,7 @@ export default function RootLayout({
         <AmazonFooterStrip />
         <Footer />
         <CookieBanner />
+        {gaId ? <GoogleAnalytics measurementId={gaId} /> : null}
       </body>
     </html>
   );

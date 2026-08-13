@@ -102,6 +102,14 @@ export function googleSiteVerification(): string | undefined {
   return code || undefined;
 }
 
+/** Google Analytics 4 Measurement ID (es. G-XXXXXXXXXX). */
+export function gaMeasurementId(): string | undefined {
+  const id = process.env["NEXT_PUBLIC_GA_MEASUREMENT_ID"]?.trim();
+  if (!id) return undefined;
+  if (!/^G-[A-Z0-9]+$/i.test(id)) return undefined;
+  return id.toUpperCase();
+}
+
 export const SITE_NAME = "Side Pitch Hub";
 export const SITE_TAGLINE = "Classifiche, news e dati calcio automatici";
 

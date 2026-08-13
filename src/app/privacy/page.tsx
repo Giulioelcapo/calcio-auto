@@ -12,7 +12,7 @@ export default function PrivacyPage() {
   const url = siteUrl();
 
   return (
-    <LegalPage title="Privacy Policy" updated="10 agosto 2026">
+    <LegalPage title="Privacy Policy" updated="13 agosto 2026">
       <p>
         Questa informativa descrive come <strong>{SITE_NAME}</strong> (
         <a href={url}>{url}</a>) tratta i dati personali degli utenti, in
@@ -45,11 +45,13 @@ export default function PrivacyPage() {
         <li>Rispondere alle richieste di contatto (esecuzione di misure precontrattuali / consenso)</li>
       </ul>
 
-      <h2>4. Google AdSense e cookie di terze parti</h2>
+      <h2>4. Google Analytics e AdSense</h2>
       <p>
-        Sul sito possono essere mostrati annunci di Google AdSense. Google può
-        usare cookie per pubblicare annunci in base alle visite precedenti
-        dell’utente su questo o altri siti. Puoi gestire le preferenze su{" "}
+        Con il tuo consenso usiamo Google Analytics 4 per misurare il traffico
+        (pagine viste, sorgenti) in forma aggregata, con IP anonimizzato. Sul
+        sito possono anche essere mostrati annunci Google AdSense: Google può
+        usare cookie per pubblicare annunci in base alle visite precedenti. Puoi
+        gestire le preferenze su{" "}
         <a
           href="https://adssettings.google.com"
           target="_blank"
@@ -57,7 +59,15 @@ export default function PrivacyPage() {
         >
           adssettings.google.com
         </a>{" "}
-        e consultare la privacy di Google.
+        e consultare la{" "}
+        <a
+          href="https://policies.google.com/privacy"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          privacy di Google
+        </a>
+        .
       </p>
 
       <h2>5. Conservazione</h2>

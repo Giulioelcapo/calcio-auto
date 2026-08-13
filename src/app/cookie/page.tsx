@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function CookiePage() {
   return (
-    <LegalPage title="Cookie Policy" updated="10 agosto 2026">
+    <LegalPage title="Cookie Policy" updated="13 agosto 2026">
       <p>
         Questa pagina spiega come <strong>{SITE_NAME}</strong> usa i cookie e
         tecnologie simili.
@@ -30,8 +30,8 @@ export default function CookiePage() {
           memorizzazione della scelta cookie.
         </li>
         <li>
-          <strong>Analitici:</strong> se attivati in futuro, per capire il
-          traffico in forma aggregata.
+          <strong>Analitici (Google Analytics 4):</strong> con consenso, per
+          misurare visite e pagine viste in forma aggregata (IP anonimizzato).
         </li>
         <li>
           <strong>Pubblicitari (Google AdSense):</strong> per mostrare annunci;
