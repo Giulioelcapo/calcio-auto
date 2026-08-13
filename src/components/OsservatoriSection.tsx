@@ -261,6 +261,20 @@ export function OsservatoriSection({
             ))}
           </div>
         </div>
+      ) : !compact ? (
+        <div className="panel space-y-2 p-4">
+          <h3 className="display-font text-sm font-bold uppercase tracking-[0.16em] text-[var(--muted)]">
+            Giocatori · ScoutScore
+          </h3>
+          <p className="text-sm font-medium text-[var(--ink)]">
+            Ancora nessun marcatore disponibile
+          </p>
+          <p className="text-sm text-[var(--muted)]">
+            I profili giocatore si attivano quando football-data.org pubblica i
+            gol (dopo le prime partite giocate). I radar club sotto restano
+            attivi sulla classifica.
+          </p>
+        </div>
       ) : null}
 
       {clubs.length ? (
