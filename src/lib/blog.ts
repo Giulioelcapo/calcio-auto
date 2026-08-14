@@ -38,6 +38,105 @@ export const BLOG_CATEGORIES: Record<BlogCategory, string> = {
  */
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "prime-giornate-serie-a-cosa-guardare-oltre-la-classifica",
+    title: "Prime giornate Serie A: cosa guardare oltre la classifica",
+    description:
+      "Inizio stagione 2026/2027: come leggere le prime giornate di Serie A senza farsi ingannare dai punti. Forma, calendario, casa/trasferta e segnali Osservatori.",
+    date: "2026-08-14",
+    author: "Giulio · Side Pitch Hub",
+    category: "analisi",
+    tags: [
+      "serie a",
+      "prime giornate",
+      "classifica serie a",
+      "analisi calcio",
+      "inizio stagione",
+    ],
+    body: [
+      {
+        type: "p",
+        text: "All’inizio di una stagione di Serie A la classifica mente spesso. Tre punti dopo la prima giornata non fanno un progetto; zero punti non chiudono un campionato. Per tifosi, media e osservatori conta leggere i segnali giusti: ritmo gol, contesto del calendario e differenza tra risultato e prestazione.",
+      },
+      {
+        type: "p",
+        text: "Su Side Pitch Hub i dati si aggiornano in automatico (football-data.org, stagione 2026/2027). Qui sotto trovi un metodo semplice, senza quote scommesse, per non farti trascinare dal solo ordinamento a punti.",
+      },
+      {
+        type: "h2",
+        text: "1. I punti delle prime giornate sono rumore (quasi sempre)",
+      },
+      {
+        type: "p",
+        text: "Nelle prime 3–5 giornate il campione di partite è troppo piccolo. Una vittoria di misura in casa contro una neopromossa e una sconfitta in trasferta contro una big pesano uguale in classifica, ma raccontano storie diverse. Meglio affiancare ai punti: gol fatti/subiti a partita, differenza reti e andamento casa/trasferta.",
+      },
+      {
+        type: "ul",
+        items: [
+          "PPG (punti a gara): utile già dopo 3 match, meglio del solo “posti in classifica”",
+          "GF/G e GS/G: ritmo offensivo e tenuta",
+          "Forma W/D/L: momentum, da leggere sempre col calendario",
+        ],
+      },
+      {
+        type: "h2",
+        text: "2. Il calendario iniziale decide chi “sembra” forte",
+      },
+      {
+        type: "p",
+        text: "Due squadre con 7 punti su 9 possono aver affrontato percorsi opposti. Prima di proclamare crisi o boom, apri il calendario e chiediti: avversari sopra o sotto la metà classifica? Quante trasferte? Quanti match a 48–72 ore di distanza?",
+      },
+      {
+        type: "quote",
+        text: "All’inizio stagione la classifica misura il percorso quanto la qualità.",
+      },
+      {
+        type: "h2",
+        text: "3. Casa e trasferta: lo split che molti ignorano",
+      },
+      {
+        type: "p",
+        text: "Alcuni club partono fortissimi in casa e soffrono fuori. Altri fanno il contrario. Confrontare PPG casa vs trasferta evita giudizi grossolani. In Osservatori Side Pitch Hub il radar club mostra anche questo gap, insieme a indici di attacco e difesa relativi alla media del campionato.",
+      },
+      {
+        type: "h2",
+        text: "4. Cosa guardare lato giocatori (quando arrivano i gol)",
+      },
+      {
+        type: "p",
+        text: "Appena l’API pubblica i marcatori, ha senso guardare chi produce gol/assist e quanto pesa sul totale della propria squadra (share). Un attaccante che segna molto in un contesto difficile (squadra a metà-bassa classifica) è un segnale diverso da chi gonfia i numeri in un attacco già dominante.",
+      },
+      {
+        type: "ul",
+        items: [
+          "ScoutScore e categorie (Hot, Gem, Creator…): ordinano segnali, non sostituiscono la visione live",
+          "% gol sulla squadra: dipendenza / uomo-chiave",
+          "Open-play vs rigori: qualità della produzione",
+        ],
+      },
+      {
+        type: "h2",
+        text: "5. Routine pratica per ogni weekend",
+      },
+      {
+        type: "ul",
+        items: [
+          "Partite di oggi → orari e risultati: https://sidepitchhub.com/oggi",
+          "Classifica Serie A → punti + contesto: https://sidepitchhub.com/serie-a/classifica",
+          "Osservatori → radar club e (quando attivi) giocatori: https://sidepitchhub.com/osservatori",
+          "Blog → metodo e approfondimenti senza rumor di mercato",
+        ],
+      },
+      {
+        type: "h2",
+        text: "In sintesi",
+      },
+      {
+        type: "p",
+        text: "Nelle prime giornate di Serie A non cercare verdetti: cerca pattern. Punti sì, ma con PPG, ritmo gol, split casa/trasferta e difficoltà del calendario. È il modo più onesto di seguire l’inizio stagione — e di usare i dati senza trasformarli in scommesse.",
+      },
+    ],
+  },
+  {
     slug: "come-leggere-la-forma-di-una-squadra",
     title: "Come leggere la forma di una squadra (senza farsi ingannare)",
     description:
