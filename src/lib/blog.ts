@@ -38,6 +38,106 @@ export const BLOG_CATEGORIES: Record<BlogCategory, string> = {
  */
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "coppa-italia-come-leggere-le-partite-dei-trentaduesimi",
+    title: "Coppa Italia: come leggere le partite dei trentaduesimi",
+    description:
+      "Guida pratica alle partite di Coppa Italia (trentaduesimi): cosa guardare oltre il risultato, turnover, ritmo e come seguire aggiornamenti su Side Pitch Hub.",
+    date: "2026-08-14",
+    author: "Giulio · Side Pitch Hub",
+    category: "analisi",
+    tags: [
+      "coppa italia",
+      "trentaduesimi",
+      "partite coppa italia",
+      "analisi calcio",
+      "turno preliminare",
+    ],
+    body: [
+      {
+        type: "p",
+        text: "La Coppa Italia entra nel vivo con i trentaduesimi: partite spesso sottovalutate, ma ricche di segnali. Ci sono big che ruotano la rosa, squadre di Serie B o C che giocano la “partita dell’anno”, e ritmi diversi dal campionato. Qui un metodo semplice per leggere queste gare — senza quote scommesse.",
+      },
+      {
+        type: "h2",
+        text: "Perché i trentaduesimi non sono “amichevoli”",
+      },
+      {
+        type: "p",
+        text: "Per le favorite è gestione del carico e test di profondità di rosa. Per le outsider è eliminazione diretta: pressione, aggressività e pochi ripensamenti. Il risultato conta, ma per un osservatore contano anche intenzioni di gioco, tenuta dopo l’ora di gioco e reazione ai cambi.",
+      },
+      {
+        type: "ul",
+        items: [
+          "Turnover: quanti titolari di campionato restano fuori?",
+          "Intensità primi 20’: le outsider spesso partono fortissime",
+          "Gestione del vantaggio: le big chiudono o lasciano spazio?",
+        ],
+      },
+      {
+        type: "h2",
+        text: "Cosa guardare minuto per minuto",
+      },
+      {
+        type: "p",
+        text: "Non serve un modello complicato. Bastano quattro domande durante la partita:",
+      },
+      {
+        type: "ul",
+        items: [
+          "Chi impone il campo? (possesso sterile vs progressioni in area)",
+          "Quante conclusioni chiare arrivano, non solo tiri da lontano?",
+          "Il pressing alto è organizzato o solo “corsa”?",
+          "Dopo il 60’: cala la squadra inferiore di categoria o tiene?",
+        ],
+      },
+      {
+        type: "quote",
+        text: "In Coppa Italia il risultato elimina. L’analisi spiega se quel risultato era sostenibile.",
+      },
+      {
+        type: "h2",
+        text: "Segnali utili post-partita (anche senza xG pagati)",
+      },
+      {
+        type: "p",
+        text: "Con i dati free puoi comunque costruire un giudizio onesto: gol e risultato ufficiale, andamento della squadra in campionato (forma, PPG, casa/trasferta) e confronto con il prossimo impegno di Serie A. Se una big fatica contro un avversario di categoria inferiore, il segnale non è “crisi totale”, ma va annotato su ritmo e attenzione difensiva.",
+      },
+      {
+        type: "ul",
+        items: [
+          "Risultato + scarto: 1-0 di misura ≠ 4-0 di controllo",
+          "Forma in campionato delle due squadre (se disponibili)",
+          "Note su giocatori giovani o riserve che hanno impattato",
+        ],
+      },
+      {
+        type: "h2",
+        text: "Come seguirla su Side Pitch Hub",
+      },
+      {
+        type: "p",
+        text: "Per orari e risultati aggregati del giorno usa Partite di oggi. Per il contesto di campionato delle squadre di Serie A apri classifica, calendario e Osservatori. Le news del giorno raccolgono spesso i pezzi ufficiali sulle gare di Coppa (comunicati Lega, biglietti, anteprime).",
+      },
+      {
+        type: "ul",
+        items: [
+          "Partite di oggi: https://sidepitchhub.com/oggi",
+          "Notizie calcio: https://sidepitchhub.com/notizie",
+          "Classifica Serie A: https://sidepitchhub.com/serie-a/classifica",
+          "Osservatori (KPI club / ScoutScore): https://sidepitchhub.com/osservatori",
+        ],
+      },
+      {
+        type: "h2",
+        text: "In sintesi",
+      },
+      {
+        type: "p",
+        text: "Nei trentaduesimi di Coppa Italia guarda oltre lo score: turnover, intensità iniziale, qualità delle conclusioni e tenuta nel finale. È il turno in cui le outsider possono creare l’impresa — e le big mostrano quanto sono profonde. Usa i dati di campionato come contesto, non come verdetto sulla singola sera di coppa.",
+      },
+    ],
+  },
+  {
     slug: "prime-giornate-serie-a-cosa-guardare-oltre-la-classifica",
     title: "Prime giornate Serie A: cosa guardare oltre la classifica",
     description:
